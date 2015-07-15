@@ -1,0 +1,24 @@
+Digraph "" {
+ratio=fill
+node [style=filled];
+	1 [label="Root"];
+	2 [label="Get"];
+	3 [label="Put"];
+	4 [label="Pickup"];
+	5 [label="Nav(t)"];
+	6 [label="Putdown"];
+	7 [label="South"];
+	8 [label="North"];
+	9 [label="East"];
+	10 [label="West"];
+	1 -> 2 ;
+	1 -> 3 ;
+	2 -> 4 ;
+	2 -> 5 ;
+	3 -> 5 ;
+	3 -> 6 ;
+	5 -> 7 ;
+	5 -> 8 ;
+	5 -> 9 ;
+	5 -> 10 ;
+}
