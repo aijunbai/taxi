@@ -9,3 +9,7 @@ This is the code release of papers:
 
 # WrightEagle
 The base code of WrightEagle soccer simulation 2D team (following the maxq-op algorithm) can be found at: [https://github.com/wrighteagle2d/wrighteaglebase](https://github.com/wrighteagle2d/wrighteaglebase)
+
+# Dependencies
+- libboost-dev 
+- libboost-program-options-dev
