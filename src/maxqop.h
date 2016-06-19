@@ -1,5 +1,5 @@
 /*
- * MaxQOLAgent.h
+ * MaxQOPAgent.h
  *
  *  Created on: Oct 10, 2011
  *      Author: baj
@@ -19,10 +19,10 @@
 
 using namespace std;
 
-class MaxQOLAgent: public OLAgent {
+class MaxQOPAgent: public OLAgent {
 public:
-	MaxQOLAgent(const bool test);
-	virtual ~MaxQOLAgent();
+	MaxQOPAgent(const bool test);
+	virtual ~MaxQOPAgent();
 
 	Action plan(const State & state);
 

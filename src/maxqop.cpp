@@ -1,5 +1,5 @@
 /*
- * MaxQOLAgent.cpp
+ * MaxQOPAgent.cpp
  *
  *  Created on: Oct 10, 2011
  *      Author: baj
@@ -7,7 +7,7 @@
 
 #include "state.h"
 #include "taxi.h"
-#include "maxqol.h"
+#include "maxqop.h"
 #include "uct.h"
 
 #include <cassert>
@@ -16,9 +16,9 @@
 
 #define DUMP_TREE 0
 
-int MaxQOLAgent::Node::id = 0;
+int MaxQOPAgent::Node::id = 0;
 
-MaxQOLAgent::MaxQOLAgent(const bool test): OLAgent(test)
+MaxQOPAgent::MaxQOPAgent(const bool test): OLAgent(test)
 {
 	maxq_[Root_T][Get_T] = new RootTransition(Get_T);
 	maxq_[Root_T][Put_T] = new RootTransition(Put_T);
@@ -72,12 +72,12 @@ MaxQOLAgent::MaxQOLAgent(const bool test): OLAgent(test)
 	max_depth_[NavY_T] = primitive_depth;
 }
 
-MaxQOLAgent::~MaxQOLAgent()
+MaxQOPAgent::~MaxQOPAgent()
 {
 	DumpSearchTree();
 }
 
-void MaxQOLAgent::DumpSearchTree()
+void MaxQOPAgent::DumpSearchTree()
 {
 	std::ofstream fout("search.dot");
 
@@ -90,7 +90,7 @@ void MaxQOLAgent::DumpSearchTree()
 	fout.close();
 }
 
-bool MaxQOLAgent::IsPrimitive(Task task)
+bool MaxQOPAgent::IsPrimitive(Task task)
 {
 	return task == Pickup_T ||
 			task == Putdown_T ||
@@ -100,7 +100,7 @@ bool MaxQOLAgent::IsPrimitive(Task task)
 			task == East_T;
 }
 
-Action MaxQOLAgent::plan(const State & state)
+Action MaxQOPAgent::plan(const State & state)
 {
 	vector<int> depths(TaskSize, 0);
 	ValuePrimitiveActionPair pair = EvaluateState(Root_T, state, depths);
@@ -114,7 +114,7 @@ Action MaxQOLAgent::plan(const State & state)
 	return pair.primitive_action;
 }
 
-bool MaxQOLAgent::IsActiveState(Task task, const State & state)
+bool MaxQOPAgent::IsActiveState(Task task, const State & state)
 {
 	switch (task) {
 	case Root_T: return true;
@@ -138,7 +138,7 @@ bool MaxQOLAgent::IsActiveState(Task task, const State & state)
 	}
 }
 
-bool MaxQOLAgent::IsTerminalState(Task task, const State & state)
+bool MaxQOPAgent::IsTerminalState(Task task, const State & state)
 {
 	switch (task) {
 	case Root_T: return state.passenger() == state.destination();
@@ -162,7 +162,7 @@ bool MaxQOLAgent::IsTerminalState(Task task, const State & state)
 	}
 }
 
-double MaxQOLAgent::TerminalEvaluation(Task task, const State & state)
+double MaxQOPAgent::TerminalEvaluation(Task task, const State & state)
 {
 	switch (task) {
 	case Root_T:
@@ -193,12 +193,12 @@ double MaxQOLAgent::TerminalEvaluation(Task task, const State & state)
 	}
 }
 
-vector<pair<State, double> > MaxQOLAgent::TerminateStates(Task task, const State & state, Task action)
+vector<pair<State, double> > MaxQOPAgent::TerminateStates(Task task, const State & state, Task action)
 {
 	return maxq_[task][action]->operator ()(state);
 }
 
-MaxQOLAgent::ValuePrimitiveActionPair MaxQOLAgent::ImmediateReward(const State & state, Task task)
+MaxQOPAgent::ValuePrimitiveActionPair MaxQOPAgent::ImmediateReward(const State & state, Task task)
 {
 	switch (task) {
 	case Pickup_T:
@@ -224,7 +224,7 @@ MaxQOLAgent::ValuePrimitiveActionPair MaxQOLAgent::ImmediateReward(const State &
 	}
 }
 
-MaxQOLAgent::ValuePrimitiveActionPair MaxQOLAgent::EvaluateState(Task task, const State & state, vector<int>& depths)
+MaxQOPAgent::ValuePrimitiveActionPair MaxQOPAgent::EvaluateState(Task task, const State & state, vector<int>& depths)
 {
 #if DUMP_TREE
 	{
@@ -289,7 +289,7 @@ MaxQOLAgent::ValuePrimitiveActionPair MaxQOLAgent::EvaluateState(Task task, cons
 	}
 }
 
-double MaxQOLAgent::EvaluateCompletion(Task task, const State & state, Task action, vector<int>& depths)
+double MaxQOPAgent::EvaluateCompletion(Task task, const State & state, Task action, vector<int>& depths)
 {
 	vector<pair<State, double> > samples = TerminateStates(task, state, action);
 	double value = 0.0;
@@ -314,7 +314,7 @@ double MaxQOLAgent::EvaluateCompletion(Task task, const State & state, Task acti
 	return value;
 }
 
-State MaxQOLAgent::RelevantStateTemplate(Task task, const State& state) //state abstractions for non-primitive actions
+State MaxQOPAgent::RelevantStateTemplate(Task task, const State& state) //state abstractions for non-primitive actions
 {
 	switch (task) {
 	case Root_T: return state;

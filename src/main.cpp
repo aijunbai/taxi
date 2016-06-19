@@ -12,7 +12,7 @@ using namespace std;
 #include "sarsa.h"
 #include "qlearning.h"
 #include "sarsa-lambda.h"
-#include "maxqol.h"
+#include "maxqop.h"
 #include "dynamicprogramming.h"
 #include "astar.h"
 #include "uct.h"
@@ -26,7 +26,7 @@ Agent *CreatorAgent(Algorithm algorithm_t, bool train)
 	case ALG_Sarsa: return new SarsaAgent(!train);
 	case ALG_QLearning: return new QLearningAgent(!train);
 	case ALG_SarsaLambda: return new SarsaLambdaAgent(!train);
-	case ALG_MaxQOL: return new MaxQOLAgent(!train);
+	case ALG_MaxQOL: return new MaxQOPAgent(!train);
 	case ALG_DynamicProgramming: return new DPAgent(!train);
 	case ALG_AStar: return new AStarAgent(!train);
 	case ALG_UCT: return new UCTAgent(!train);
@@ -56,7 +56,7 @@ int main(int argc, char **argv) {
 	            				("sasar,s", "use SASAR algorithm")
 	            				("qlearning,q", "use Qlearning algorithm")
 	            				("sasar-lambda,l", "use SASAR-lambda algorithm")
-	            				("maxq-ol,o", "use MaxQ-OL algorithm")
+	            				("maxq-ol,o", "use MaxQ-OP algorithm")
 	            				("dynamicprogramming,d", "use DynamicProgramming algorithm")
 	            				("astar,a", "use A* algorithm")
 	            				("uct,u", "use UCT algorithm")

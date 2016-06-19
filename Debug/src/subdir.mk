@@ -8,7 +8,7 @@ CPP_SRCS += \
 ../src/dot_graph.cpp \
 ../src/dynamicprogramming.cpp \
 ../src/main.cpp \
-../src/maxqol.cpp \
+../src/maxqop.cpp \
 ../src/monte-carlo.cpp \
 ../src/policy.cpp \
 ../src/qlearning.cpp \
@@ -26,7 +26,7 @@ OBJS += \
 ./src/dot_graph.o \
 ./src/dynamicprogramming.o \
 ./src/main.o \
-./src/maxqol.o \
+./src/maxqop.o \
 ./src/monte-carlo.o \
 ./src/policy.o \
 ./src/qlearning.o \
@@ -44,7 +44,7 @@ CPP_DEPS += \
 ./src/dot_graph.d \
 ./src/dynamicprogramming.d \
 ./src/main.d \
-./src/maxqol.d \
+./src/maxqop.d \
 ./src/monte-carlo.d \
 ./src/policy.d \
 ./src/qlearning.d \
