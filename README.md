@@ -1,5 +1,5 @@
 # maxq-op
-[![Build Status](https://travis-ci.org/aijunbai/maxq-op.svg?branch=master)](https://travis-ci.org/aijunbai/maxq-op)  
+[![Build Status](https://travis-ci.org/aijunbai/maxq-op.svg?branch=master)](https://travis-ci.org/aijunbai/maxq-op)
 
 This is the code release of MAXQ-OP algorithm for the Taxi domain as shown in papers:
 - [Online planning for large Markov decision processes with hierarchical decomposition](https://aijunbai.github.io/publications/TIST15-Bai.pdf), Aijun Bai, Feng Wu, and Xiaoping Chen, ACM Transactions on Intelligent Systems and Technology (ACM TIST),6(4):45:1–45:28, July 2015.
@@ -12,10 +12,12 @@ It has also some less-tested implementations of other reinforcement learning and
 # Files
 - `maxqop.{h, cpp}`: main MAXQ-OP algorithm
 - `agent.h`: abstract `Agent` class
+- `state.{h, cpp}`: abstract `State` class
 - `policy.{h, cpp}`: `Policy` classes
 - `taxi.{h, cpp}`: the Taxi domain
 - `system.{h, cpp}`: agent-environment driver code
 - `table.h`: tabular V/Q functions
+- `dot_graph.{h, cpp}`: tools to generate graphviz `dot` files
 
 # WrightEagle
 The base code of WrightEagle soccer simulation 2D team (following the maxq-op algorithm) can be found at: [https://github.com/wrighteagle2d/wrighteaglebase](https://github.com/wrighteagle2d/wrighteaglebase)
