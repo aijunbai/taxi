@@ -12,6 +12,7 @@
 #include <cstdlib>
 #include <algorithm>
 #include <sstream>
+#include "prettyprint.h"
 
 struct Double {
 	double value_;
@@ -48,5 +49,17 @@ std::stringstream ss;
 ss << t;
 return ss.str();
 }
+
+#define PRINT_VALUE(x) \
+  do { \
+  std::cerr << #x " = '" << x << "'" << std::endl; \
+  } while(0)
+
+#define PRINT_VALUE_STREAM(os, x) \
+  do { \
+  os << #x " = '" << x << "'" << std::endl; \
+  } while(0)
+
+
 
 #endif /* UTILS_H_ */

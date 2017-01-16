@@ -54,8 +54,8 @@ std::pair<State, double> AStarAgent::apply(State state, const Action action)
 		cost = 1.0;
 		break;
 	case Pickup:
-		if (state.passenger() != int(TaxiEnv::model->stops().size()) && taxi == TaxiEnv::model->stops()[state.passenger()]) {
-			state.passenger() = int(TaxiEnv::model->stops().size());
+		if (state.passenger() != int(TaxiEnv::model->terminals().size()) && taxi == TaxiEnv::model->terminals()[state.passenger()]) {
+			state.passenger() = int(TaxiEnv::model->terminals().size());
 			cost = 1.0;
 		}
 		else {
@@ -63,7 +63,7 @@ std::pair<State, double> AStarAgent::apply(State state, const Action action)
 		}
 		break;
 	case Putdown:
-		if (state.passenger() == int(TaxiEnv::model->stops().size()) && taxi == TaxiEnv::model->stops()[state.destination()]) {
+		if (state.passenger() == int(TaxiEnv::model->terminals().size()) && taxi == TaxiEnv::model->terminals()[state.destination()]) {
 			state.passenger() = state.destination();
 			cost = /*20.0*/0.0;
 		}

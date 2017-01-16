@@ -10,6 +10,8 @@
 #include "utils.h"
 #include "sarsa-lambda.h"
 
+double SarsaLambdaAgent::lambda = 0.9;
+
 void SarsaLambdaAgent::learn(const State & state, int action, double reward, const State & post_state, int post_action)
 {
 	backup(state, action, reward, qvalue(post_state, post_action));

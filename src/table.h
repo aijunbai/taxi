@@ -17,14 +17,14 @@
 #include <vector>
 #include <map>
 #include <cassert>
-#include <tr1/unordered_map>
-#include <tr1/unordered_set>
+#include <unordered_map>
+#include <unordered_set>
 
 template<typename K, typename V>
-struct HashMap : std::tr1::unordered_map<K, V> {};
+struct HashMap : std::unordered_map<K, V> {};
 
 template<typename K>
-struct HashSet : std::tr1::unordered_set<K> {};
+struct HashSet : std::unordered_set<K> {};
 
 template<class KeyType, class DataType>
 class Table: public std::map<KeyType, DataType> {

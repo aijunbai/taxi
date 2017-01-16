@@ -44,7 +44,7 @@ double System::simulate(Agent & agent, bool verbose)
 			if (verbose) {
 				cout << " | Reward: " << reward;
 
-				if (env_.success()) {
+				if (env_.unloaded()) {
 					cout << " | Success" << endl;
 				}
 				else {
@@ -75,4 +75,19 @@ double System::simulate(Agent & agent, bool verbose)
 	}
 
 	return rewards;
+}
+
+double System::simulateFSM(HierarchicalFSMAgent & agent, bool verbose)
+{
+  const int max_steps = 1024;
+
+  agent.setEnv(&env_);
+  agent.setMax_steps(max_steps);
+  agent.setVerbose(verbose);
+
+  agent.reset();
+  env_.reset();
+
+  double rewards = agent.run();
+  return rewards;
 }

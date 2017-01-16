@@ -77,10 +77,10 @@ public:
 	class EnvModel {
 	public:
 		EnvModel() {
-			stops_.push_back(Position(0, 0));
-			stops_.push_back(Position(0, SIZE - 1));
-			stops_.push_back(Position(SIZE - 2, 0));
-			stops_.push_back(Position(SIZE - 1, SIZE - 1));
+			terminals_.push_back(Position(0, 0));
+			terminals_.push_back(Position(0, SIZE - 1));
+			terminals_.push_back(Position(SIZE - 2, 0));
+			terminals_.push_back(Position(SIZE - 1, SIZE - 1));
 
 			for (int x = 0; x < SIZE; ++x) {
 				for (int y = 0; y < SIZE; ++y) {
@@ -118,8 +118,8 @@ public:
 			delta_[x][y][dir] = Position(0, 0);
 		}
 
-		const std::vector<Position> & stops() const {
-			return stops_;
+		const std::vector<Position> & terminals() const {
+			return terminals_;
 		}
 
 		static int distance(const Position& a, const Position& b) {
@@ -127,7 +127,7 @@ public:
 		}
 
 	private:
-		std::vector<Position> stops_;
+		std::vector<Position> terminals_;
 
 	public:
 		mutable HashMap<int, HashMap<int, HashMap<int, Position> > > delta_;
@@ -150,17 +150,26 @@ public:
 
 	double step(Action action);
 
-	State get_state() {
+	const State &get_state() {
 		return *state_;
 	}
 
-	bool success() {
+	bool unloaded() {
 		return state_->passenger() == state_->destination();
 	}
 
-	bool terminate() {
-		return success();
+	bool loaded() {
+		return state_->passenger() == int(model->terminals().size());
 	}
+
+	bool terminate() {
+		return unloaded();
+	}
+
+	Position destination() { return model->terminals()[state_->destination()]; };
+	Position passenger() { return model->terminals()[state_->passenger()]; };
+	Position terminal(int i) { return model->terminals()[i]; };
+	Position taxi() { return Position(state_->x(), state_->y()); }
 
 private:
 	Position get_random_position() {
@@ -168,7 +177,7 @@ private:
 	}
 
 	int get_random_stop() {
-		return rand() % model->stops().size();
+		return rand() % model->terminals().size();
 	}
 
 private:

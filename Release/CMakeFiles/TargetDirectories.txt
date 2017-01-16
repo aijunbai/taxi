@@ -1,0 +1,3 @@
+/home/baj/Dropbox/Workspace/github/maxq-op/Release/CMakeFiles/edit_cache.dir
+/home/baj/Dropbox/Workspace/github/maxq-op/Release/CMakeFiles/rebuild_cache.dir
+/home/baj/Dropbox/Workspace/github/maxq-op/Release/CMakeFiles/maxq_op.dir

@@ -43,7 +43,7 @@ public:
 
 class EpsilonGreedyPolicy: public GreedyPolicy {
 private:
-	static const double epsilon_ = 0.1;
+	static double epsilon_;
 
 public:
 	virtual Action get_action(const std::vector<double> &distri);

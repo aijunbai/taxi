@@ -15,7 +15,7 @@
  */
 class SarsaLambdaAgent: public TemporalDifferenceAgent {
 public:
-	static const double lambda = 0.9;
+	static double lambda;
 
 public:
 	SarsaLambdaAgent(const bool test): TemporalDifferenceAgent("sarsa-lambda", test) {

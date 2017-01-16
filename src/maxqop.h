@@ -113,13 +113,13 @@ private:
 			State tmp(state);
 
 			if (action_ == Get_T) {
-				tmp.x() = TaxiEnv::model->stops()[state.passenger()].x;
-				tmp.y() = TaxiEnv::model->stops()[state.passenger()].y;
-				tmp.passenger() = TaxiEnv::model->stops().size();
+				tmp.x() = TaxiEnv::model->terminals()[state.passenger()].x;
+				tmp.y() = TaxiEnv::model->terminals()[state.passenger()].y;
+				tmp.passenger() = TaxiEnv::model->terminals().size();
 			}
 			else if (action_ == Put_T) {
-				tmp.x() = TaxiEnv::model->stops()[state.destination()].x;
-				tmp.y() = TaxiEnv::model->stops()[state.destination()].y;
+				tmp.x() = TaxiEnv::model->terminals()[state.destination()].x;
+				tmp.y() = TaxiEnv::model->terminals()[state.destination()].y;
 				tmp.passenger() = state.destination();
 			}
 			else {
@@ -145,8 +145,8 @@ private:
 			switch (action_) {
 			case Pickup_T:
 				if (task_ == Get_T) {
-					if (TaxiEnv::Position(state.x(), state.y()) == TaxiEnv::model->stops()[state.passenger()]) {
-						tmp.passenger() = TaxiEnv::model->stops().size();
+					if (TaxiEnv::Position(state.x(), state.y()) == TaxiEnv::model->terminals()[state.passenger()]) {
+						tmp.passenger() = TaxiEnv::model->terminals().size();
 					}
 				}
 				else {
@@ -156,7 +156,8 @@ private:
 
 			case Putdown_T:
 				if (task_ == Put_T) {
-					if (state.passenger() == int(TaxiEnv::model->stops().size()) && TaxiEnv::Position(state.x(), state.y()) == TaxiEnv::model->stops()[state.destination()]) {
+					if (state.passenger() == int(TaxiEnv::model->terminals().size()) && TaxiEnv::Position(state.x(), state.y()) ==
+                                                                              TaxiEnv::model->terminals()[state.destination()]) {
 						tmp.passenger() = state.destination();
 					}
 				}
@@ -166,23 +167,23 @@ private:
 				break;
 
 			case NavB_T:
-				tmp.x() = TaxiEnv::model->stops()[2].x;
-				tmp.y() = TaxiEnv::model->stops()[2].y;
+				tmp.x() = TaxiEnv::model->terminals()[2].x;
+				tmp.y() = TaxiEnv::model->terminals()[2].y;
 				break;
 
 			case NavY_T:
-				tmp.x() = TaxiEnv::model->stops()[0].x;
-				tmp.y() = TaxiEnv::model->stops()[0].y;
+				tmp.x() = TaxiEnv::model->terminals()[0].x;
+				tmp.y() = TaxiEnv::model->terminals()[0].y;
 				break;
 
 			case NavR_T:
-				tmp.x() = TaxiEnv::model->stops()[1].x;
-				tmp.y() = TaxiEnv::model->stops()[1].y;
+				tmp.x() = TaxiEnv::model->terminals()[1].x;
+				tmp.y() = TaxiEnv::model->terminals()[1].y;
 				break;
 
 			case NavG_T:
-				tmp.x() = TaxiEnv::model->stops()[3].x;
-				tmp.y() = TaxiEnv::model->stops()[3].y;
+				tmp.x() = TaxiEnv::model->terminals()[3].x;
+				tmp.y() = TaxiEnv::model->terminals()[3].y;
 				break;
 
 			default: assert(0); break;

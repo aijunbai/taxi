@@ -9,6 +9,7 @@
 #define STATE_H_
 
 #include "utils.h"
+#include <tuple>
 #include "boost/tuple/tuple.hpp"
 #include "boost/tuple/tuple_comparison.hpp"
 #include "boost/tuple/tuple_io.hpp"
@@ -18,6 +19,8 @@
 
 class State: public boost::tuples::tuple<int, int, int, int> {
 public:
+	State() {}
+
 	State(const int & a, const int & b, const int & c, const int & d);
 
 	int x() const;

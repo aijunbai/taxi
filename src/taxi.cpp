@@ -56,7 +56,7 @@ vector<pair<State, double> > TaxiEnv::Transition(const State & state, Action act
 	else {
 		switch (action) {
 		case Putdown:
-			if (!(state.passenger() == int(model->stops().size()) && Position(state.x(), state.y()) == model->stops()[state.destination()])) {
+			if (!(state.passenger() == int(model->terminals().size()) && Position(state.x(), state.y()) == model->terminals()[state.destination()])) {
 				samples.push_back(make_pair(state, 1.0));
 			}
 			else {
@@ -66,12 +66,12 @@ vector<pair<State, double> > TaxiEnv::Transition(const State & state, Action act
 			}
 			break;
 		case Pickup:
-			if (state.passenger() == int(model->stops().size()) || Position(state.x(), state.y()) != model->stops()[state.passenger()]) {
+			if (state.passenger() == int(model->terminals().size()) || Position(state.x(), state.y()) != model->terminals()[state.passenger()]) {
 				samples.push_back(make_pair(state, 1.0));
 			}
 			else {
 				State tmp(state);
-				tmp.passenger() = int(model->stops().size());
+				tmp.passenger() = int(model->terminals().size());
 				samples.push_back(make_pair(tmp, 1.0));
 			}
 			break;
@@ -134,14 +134,14 @@ double TaxiEnv::Reward(const State & state, Action action)
 
 	switch (action) {
 	case Pickup:
-		if (state.passenger() == int(model->stops().size()) || Position(state.x(), state.y()) != model->stops()[state.passenger()]) {
+		if (state.passenger() == int(model->terminals().size()) || Position(state.x(), state.y()) != model->terminals()[state.passenger()]) {
 			return -10;
 		}
 		else {
 			return -1;
 		}
 	case Putdown:
-		if (state.passenger() == int(model->stops().size()) && Position(state.x(), state.y()) == model->stops()[state.destination()]) {
+		if (state.passenger() == int(model->terminals().size()) && Position(state.x(), state.y()) == model->terminals()[state.destination()]) {
 			return +20;
 		}
 		else {

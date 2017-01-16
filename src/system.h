@@ -12,6 +12,7 @@
 #include <cmath>
 
 #include "taxi.h"
+#include "HierarchicalFSMAgent.h"
 
 class Agent;
 
@@ -26,8 +27,8 @@ public:
 	}
 
 	double simulate(Agent & agent, bool verbose = true);
+	double simulateFSM(HierarchicalFSMAgent & agent, bool verbose = true);
 
-private:
 	TaxiEnv env_;
 };
 

@@ -23,7 +23,8 @@ enum Algorithm {
 	ALG_MaxQOL,
 	ALG_DynamicProgramming,
 	ALG_AStar,
-	ALG_UCT
+	ALG_UCT,
+  ALG_HierarchicalFSM
 };
 
 

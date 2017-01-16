@@ -11,6 +11,8 @@
 #include "policy.h"
 #include "utils.h"
 
+double EpsilonGreedyPolicy::epsilon_ = 0.1;
+
 Action RandomPolicy::get_action(const std::vector<double> &distri)
 {
 	return Action(rand() % distri.size());

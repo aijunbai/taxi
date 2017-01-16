@@ -16,206 +16,290 @@ using namespace std;
 #include "dynamicprogramming.h"
 #include "astar.h"
 #include "uct.h"
+#include "HierarchicalFSMAgent.h"
 
 #include <sys/time.h>
+#include <thread>
+#include <mutex>
 
 Agent *CreatorAgent(Algorithm algorithm_t, bool train)
 {
-	switch (algorithm_t) {
-	case ALG_MonteCarlo: return new MonteCarloAgent(!train);
-	case ALG_Sarsa: return new SarsaAgent(!train);
-	case ALG_QLearning: return new QLearningAgent(!train);
-	case ALG_SarsaLambda: return new SarsaLambdaAgent(!train);
-	case ALG_MaxQOL: return new MaxQOPAgent(!train);
-	case ALG_DynamicProgramming: return new DPAgent(!train);
-	case ALG_AStar: return new AStarAgent(!train);
-	case ALG_UCT: return new UCTAgent(!train);
-	default: return 0;
-	}
+  switch (algorithm_t) {
+    case ALG_MonteCarlo: return new MonteCarloAgent(!train);
+    case ALG_Sarsa: return new SarsaAgent(!train);
+    case ALG_QLearning: return new QLearningAgent(!train);
+    case ALG_SarsaLambda: return new SarsaLambdaAgent(!train);
+    case ALG_MaxQOL: return new MaxQOPAgent(!train);
+    case ALG_DynamicProgramming: return new DPAgent(!train);
+    case ALG_AStar: return new AStarAgent(!train);
+    case ALG_UCT: return new UCTAgent(!train);
+    case ALG_HierarchicalFSM: return new HierarchicalFSMAgent(!train);
+    default: return 0;
+  }
 }
 
 void set_random_seed(int seed)
 {
-	srand(seed);
-	srand48(seed);
+  srand(seed);
+  srand48(seed);
+}
+
+mutex g_rewards_mutex;
+mutex g_time_mutex;
+mutex g_delete_mutex;
+
+void call_from_thread(int tid,
+                      int num_threads,
+                      Algorithm algorithm,
+                      vector<double> *rewards,
+                      vector<double> *time,
+                      double *avg_time,
+                      int episodes,
+                      int trials,
+                      bool verbose) {
+  for (int i = 0; i < trials; ++i) {
+    if (i % num_threads == tid) {
+      cerr << "#trials " << i << endl;
+      Agent *agent = CreatorAgent(algorithm, true);
+
+      struct timeval start, end;
+      double time_use;
+      gettimeofday(&start, NULL);
+
+      for (int j = 0; j < episodes; ++j) {
+        cerr << "#episodes " << j << endl;
+        double r = 0.0;
+        if (algorithm == ALG_HierarchicalFSM) {
+          r = System().simulateFSM(*static_cast<HierarchicalFSMAgent *>(agent), verbose);
+        } else {
+          r = System().simulate(*agent, verbose);
+        }
+        g_rewards_mutex.lock();
+        (*rewards)[j] += r;
+        g_rewards_mutex.unlock();
+      }
+
+      gettimeofday(&end, NULL);
+      time_use = 1000000.0 * (end.tv_sec - start.tv_sec) + end.tv_usec - start.tv_usec;
+      time_use /= 1000.0;
+
+      g_time_mutex.lock();
+      *avg_time += time_use;
+      time->push_back(time_use);
+      g_time_mutex.unlock();
+
+      g_delete_mutex.lock();
+      delete agent;
+      g_delete_mutex.unlock();
+    }
+  }
 }
 
 int main(int argc, char **argv) {
-	Algorithm algorithm = ALG_None;
-	bool train = false;
-	bool profile = false;
+  Algorithm algorithm = ALG_None;
+  bool train = false;
+  bool profile = false;
+  bool verbose = false;
+  bool multithreaded = false;
 
-	try {
-		po::options_description desc("Allowed options");
-		desc.add_options()
-	            				("help,h", "produce help message")
-	            				("debug,D", "debug mode (do not set random seed)")
-	            				("profile,p", "profile a policy or an online policy")
-	            				("train,t", "set as train mode")
-	            				("monte-carlo,m", "use MonteCarlo algorithm")
-	            				("sasar,s", "use SASAR algorithm")
-	            				("qlearning,q", "use Qlearning algorithm")
-	            				("sasar-lambda,l", "use SASAR-lambda algorithm")
-	            				("maxq-ol,o", "use MaxQ-OP algorithm")
-	            				("dynamicprogramming,d", "use DynamicProgramming algorithm")
-	            				("astar,a", "use A* algorithm")
-	            				("uct,u", "use UCT algorithm")
-	            				("size,S", po::value<int>(&TaxiEnv::SIZE), "Problem size")
-	            				;
+  try {
+    po::options_description desc("Allowed options");
+    desc.add_options()
+        ("help,h", "produce help message")
+        ("verbose,v", "verbose mode")
+        ("debug,D", "debug mode (do not set random seed)")
+        ("profile,p", "profile a policy or an online policy")
+        ("train,t", "set as train mode")
+        ("monte-carlo,m", "use MonteCarlo algorithm")
+        ("sasar,s", "use SASAR algorithm")
+        ("qlearning,q", "use Qlearning algorithm")
+        ("sasar-lambda,l", "use SASAR-lambda algorithm")
+        ("maxq-ol,o", "use MaxQ-OP algorithm")
+        ("dynamicprogramming,d", "use DynamicProgramming algorithm")
+        ("astar,a", "use A* algorithm")
+        ("uct,u", "use UCT algorithm")
+        ("hierarchicalfsm,H", "use hierarchical FSM algorithm")
+        ("size,S", po::value<int>(&TaxiEnv::SIZE), "Problem size")
+        ("multithreaded,M", "use multi thread mode")
+        ;
 
-		po::variables_map vm;
-		po::store(po::parse_command_line(argc, argv, desc), vm);
-		po::notify(vm);
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc, (const char *const *) argv, desc), vm);
+    po::notify(vm);
 
-		if (vm.count("help")) {
-			cout << desc << "\n";
-			return 1;
-		}
+    if (vm.count("help")) {
+      cout << desc << "\n";
+      return 1;
+    }
 
-		if (vm.count("train")) {
-			train = true;
-		}
+    if (vm.count("train")) {
+      train = true;
+    }
 
-		if (vm.count("profile")) {
-			profile = true;
-		}
+    if (vm.count("profile")) {
+      profile = true;
+    }
 
-		if (vm.count("monte-carlo")) {
-			algorithm = ALG_MonteCarlo;
-		}
-		else if (vm.count("sasar")) {
-			algorithm = ALG_Sarsa;
-		}
-		else if (vm.count("qlearning")) {
-			algorithm = ALG_QLearning;
-		}
-		else if (vm.count("sasar-lambda")) {
-			algorithm = ALG_SarsaLambda;
-		}
-		else if (vm.count("maxq-ol")) {
-			algorithm = ALG_MaxQOL;
-		}
-		else if (vm.count("dynamicprogramming")) {
-			algorithm = ALG_DynamicProgramming;
-		}
-		else if (vm.count("astar")) {
-			algorithm = ALG_AStar;
-		}
-		else if (vm.count("uct")) {
-			algorithm = ALG_UCT;
-		}
-		else {
-			cout << desc << "\n";
-			return 1;
-		}
+    if (vm.count("verbose")) {
+      verbose = true;
+    }
 
-		if (!vm.count("debug")) {
-			set_random_seed(getpid());
-		}
-	}
-	catch(exception& e) {
-		cerr << "error: " << e.what() << "\n";
-		return 1;
-	}
-	catch(...) {
-		cerr << "Exception of unknown type!\n";
-		return 1;
-	}
+    if (vm.count("multithreaded")) {
+      multithreaded = true;
+    }
 
-	TaxiEnv::model = new TaxiEnv::EnvModel();
+    if (vm.count("monte-carlo")) {
+      algorithm = ALG_MonteCarlo;
+    }
+    else if (vm.count("sasar")) {
+      algorithm = ALG_Sarsa;
+    }
+    else if (vm.count("qlearning")) {
+      algorithm = ALG_QLearning;
+    }
+    else if (vm.count("sasar-lambda")) {
+      algorithm = ALG_SarsaLambda;
+    }
+    else if (vm.count("maxq-ol")) {
+      algorithm = ALG_MaxQOL;
+    }
+    else if (vm.count("dynamicprogramming")) {
+      algorithm = ALG_DynamicProgramming;
+    }
+    else if (vm.count("astar")) {
+      algorithm = ALG_AStar;
+    }
+    else if (vm.count("uct")) {
+      algorithm = ALG_UCT;
+    }
+    else if (vm.count("hierarchicalfsm")) {
+      algorithm = ALG_HierarchicalFSM;
+    }
+    else {
+      cout << desc << "\n";
+      return 1;
+    }
 
-	if (profile) { //profile on all states with 100 trials for each state
-		double avg_reward = 0.0, avg_time = 0.0;
-		int trials = 1000;
+    if (!vm.count("debug")) {
+      set_random_seed(getpid());
+    }
+  }
+  catch(exception& e) {
+    cerr << "error: " << e.what() << "\n";
+    return 1;
+  }
+  catch(...) {
+    cerr << "Exception of unknown type!\n";
+    return 1;
+  }
 
-		vector<double> rewards, time;
+  TaxiEnv::model = new TaxiEnv::EnvModel();
 
-		Agent *agent = CreatorAgent(algorithm, false);
+  if (profile) { //profile on all states with 100 trials for each state
+    double avg_reward = 0.0, avg_time = 0.0;
+    int trials = 1000;
 
-		for (int trial = 0; trial < trials; ++trial) {
-			System system;
+    vector<double> rewards, time;
 
-			struct timeval start, end;
-			double time_use;
-			gettimeofday(&start, NULL);
+    Agent *agent = CreatorAgent(algorithm, false);
 
-			double reward = system.simulate(*agent, false);
+    for (int trial = 0; trial < trials; ++trial) {
+      System system;
 
-			gettimeofday(&end, NULL);
-			time_use = 1000000.0 * (end.tv_sec - start.tv_sec) + end.tv_usec - start.tv_usec;
-			time_use /= 1000.0;
+      struct timeval start, end;
+      double time_use;
+      gettimeofday(&start, NULL);
 
-			avg_reward += reward;
-			avg_time += time_use;
+      double reward = 0.0;
+      if (algorithm == ALG_HierarchicalFSM) {
+        reward = system.simulateFSM(*static_cast<HierarchicalFSMAgent*>(agent), verbose);
+      }
+      else {
+        reward = system.simulate(*agent, verbose);
+      }
 
-			rewards.push_back(reward);
-			time.push_back(time_use);
-		}
+      gettimeofday(&end, NULL);
+      time_use = 1000000.0 * (end.tv_sec - start.tv_sec) + end.tv_usec - start.tv_usec;
+      time_use /= 1000.0;
 
-		delete agent;
+      avg_reward += reward;
+      avg_time += time_use;
 
-		avg_reward /= trials;
-		avg_time /= trials;
+      rewards.push_back(reward);
+      time.push_back(time_use);
+    }
 
-		double sum_rewards = 0.0, sum_time = 0.0;
-		for (int i = 0; i < trials; ++i) {
-			sum_rewards += (rewards[i] - avg_reward) * (rewards[i] - avg_reward);
+    delete agent;
 
-			sum_time += (time[i] - avg_time) * (time[i] - avg_time);
-		}
+    avg_reward /= trials;
+    avg_time /= trials;
+
+    double sum_rewards = 0.0, sum_time = 0.0;
+    for (int i = 0; i < trials; ++i) {
+      sum_rewards += (rewards[i] - avg_reward) * (rewards[i] - avg_reward);
+
+      sum_time += (time[i] - avg_time) * (time[i] - avg_time);
+    }
 
     cout << TaxiEnv::SIZE << " ";
-		cout << avg_reward << " " << sqrt(sum_rewards) / trials << " ";
-		cout << avg_time << " " << sqrt(sum_time) / trials << endl;
-	}
-	else if (!train) { //test
-		Agent *agent = CreatorAgent(algorithm, false);
+    cout << avg_reward << " " << sqrt(sum_rewards) / trials << " ";
+    cout << avg_time << " " << sqrt(sum_time) / trials << endl;
+  }
+  else if (!train) { //test
+    Agent *agent = CreatorAgent(algorithm, false);
 
-		cout << "Reward: " << System().simulate(*agent, true) << endl;
+    if (algorithm == ALG_HierarchicalFSM) {
+      cout << "Reward: " << System().simulateFSM(*static_cast<HierarchicalFSMAgent*>(agent), verbose) << endl;
+    }
+    else {
+      cout << "Reward: " << System().simulate(*agent, verbose) << endl;
+    }
 
-		delete agent;
-	}
-	else { //train for rl agent
-		//settings taken from:﻿ Jong, N.K., Stone, P.: Hierarchical model-based reinforcement learning: R-MAX + MAXQ. Proceedings of the 25th international conference on Machine learning - ICML  ’08. pp. 432-439. ACM Press, New York, New York, USA (2008).
-		const int trials = 1;
-		const int episodes = 50;
+    delete agent;
+  }
+  else { //train for rl agent
+    int num_threads = 1;
+    if (multithreaded) num_threads = thread::hardware_concurrency();
 
-		vector<double> rewards(episodes, 0.0), time;
-		double avg_time = 0.0;
+    const int trials = 100;
+    const int episodes = 2500;
 
-		for (int i = 0; i < trials; ++i) {
-		  Agent *agent = CreatorAgent(algorithm, true);
+    vector<double> rewards(episodes, 0.0), time;
+    double avg_time = 0.0;
 
-		  struct timeval start, end;
-		  double time_use;
-		  gettimeofday(&start, NULL);
+    std::thread t[num_threads];
 
-		  for (int j = 0; j < episodes; ++j) {
-		    rewards[j] += System().simulate(*agent, false);
-		  }
+    for (int i = 0; i < num_threads; ++i) {
+      t[i] = std::thread(
+          call_from_thread,
+          i,
+          num_threads,
+          algorithm,
+          &rewards,
+          &time,
+          &avg_time,
+          episodes,
+          trials,
+          verbose);
+    }
 
-		  gettimeofday(&end, NULL);
-		  time_use = 1000000.0 * (end.tv_sec - start.tv_sec) + end.tv_usec - start.tv_usec;
-		  time_use /= 1000.0;
+    //Join the threads with the main thread
+    for (int i = 0; i < num_threads; ++i) {
+      t[i].join();
+    }
 
-		  avg_time += time_use;
-		  time.push_back(time_use);
+    for (int i = 0; i < episodes; ++i) {
+      rewards[i] /= trials;
+      cout << rewards[i] << endl;
+    }
 
-		  delete agent;
-		}
+    double sum_time = 0.0;
+    for (int i = 0; i < trials; ++i) {
+      sum_time += (time[i] - avg_time) * (time[i] - avg_time);
+    }
 
-//		for (int i = 0; i < episodes; ++i) {
-//			rewards[i] /= trials;
-//			cout << rewards[i] << endl;
-//		}
+    cout << "#Avg. Time: " << avg_time << "+/-" << sqrt(sum_time) / trials << endl;
+  }
 
-		double sum_time = 0.0;
-		for (int i = 0; i < trials; ++i) {
-			sum_time += (time[i] - avg_time) * (time[i] - avg_time);
-		}
-
-		cout << "#Avg. Time: " << avg_time << "+/-" << sqrt(sum_time) / trials << endl;
-	}
-
-	return 0;
+  return 0;
 }

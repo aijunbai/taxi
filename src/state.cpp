@@ -51,7 +51,6 @@ int& State::destination()
 	return this->get<3>();
 }
 
-
 std::string State::str() const
 {
 	std::stringstream ss;
