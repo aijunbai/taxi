@@ -26,8 +26,8 @@ public:
 		env_.set(state);
 	}
 
-	double simulate(Agent & agent, bool verbose = true);
-	double simulateFSM(HierarchicalFSMAgent & agent, bool verbose = true);
+	double simulate(Agent & agent, bool verbose);
+	double simulateFSM(HierarchicalFSMAgent & agent, bool verbose, bool useStaticTransition);
 
 	TaxiEnv env_;
 };

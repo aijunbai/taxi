@@ -7,48 +7,48 @@
 
 #include "state.h"
 
-State::State(const int & a, const int & b, const int & c, const int & d): boost::tuples::tuple<int, int, int, int>(a, b, c, d)
+State::State(const int & a, const int & b, const int & c, const int & d): tuple<int, int, int, int>(a, b, c, d)
 {
 
 }
 
 int State::x() const
 {
-	return this->get<0>();
+  return get<0>(*this);
 }
 
 int State::y() const
 {
-	return this->get<1>();
+	return get<1>(*this);
 }
 
 int State::passenger() const
 {
-	return this->get<2>();
+	return get<2>(*this);
 }
 
 int State::destination() const
 {
-	return this->get<3>();
+	return get<3>(*this);
 }
 
 int& State::x()
 {
-	return this->get<0>();
+	return get<0>(*this);
 }
 
 int& State::y() {
-	return this->get<1>();
+	return get<1>(*this);
 }
 
 int& State::passenger()
 {
-	return this->get<2>();
+	return get<2>(*this);
 }
 
 int& State::destination()
 {
-	return this->get<3>();
+	return get<3>(*this);
 }
 
 std::string State::str() const
@@ -58,7 +58,7 @@ std::string State::str() const
 	return ss.str();
 }
 
-bool State::absorbing() const
+bool State::terminate() const
 {
 	return passenger() == destination();
 }

@@ -50,7 +50,7 @@ vector<pair<State, double> > TaxiEnv::Transition(const State & state, Action act
 {
 	vector<pair<State, double> > samples;
 
-	if (state.absorbing()) {
+	if (state.terminate()) {
 		samples.push_back(make_pair(state, 1.0));
 	}
 	else {
@@ -128,7 +128,7 @@ vector<pair<State, double> > TaxiEnv::Transition(const State & state, Action act
 
 double TaxiEnv::Reward(const State & state, Action action)
 {
-	if (state.absorbing()) {
+	if (state.terminate()) {
 		return 0.0;
 	}
 

@@ -56,7 +56,8 @@ void call_from_thread(int tid,
                       double *avg_time,
                       int episodes,
                       int trials,
-                      bool verbose) {
+                      bool verbose,
+                      bool useStaticTransition) {
   for (int i = 0; i < trials; ++i) {
     if (i % num_threads == tid) {
       cerr << "#trials " << i << endl;
@@ -70,7 +71,7 @@ void call_from_thread(int tid,
         cerr << "#episodes " << j << endl;
         double r = 0.0;
         if (algorithm == ALG_HierarchicalFSM) {
-          r = System().simulateFSM(*static_cast<HierarchicalFSMAgent *>(agent), verbose);
+          r = System().simulateFSM(*static_cast<HierarchicalFSMAgent *>(agent), verbose, useStaticTransition);
         } else {
           r = System().simulate(*agent, verbose);
         }
@@ -100,6 +101,7 @@ int main(int argc, char **argv) {
   bool train = false;
   bool profile = false;
   bool verbose = false;
+  bool useStaticTransition = false;
   bool multithreaded = false;
 
   try {
@@ -119,8 +121,9 @@ int main(int argc, char **argv) {
         ("astar,a", "use A* algorithm")
         ("uct,u", "use UCT algorithm")
         ("hierarchicalfsm,H", "use hierarchical FSM algorithm")
-        ("size,S", po::value<int>(&TaxiEnv::SIZE), "Problem size")
+        ("size,n", po::value<int>(&TaxiEnv::SIZE), "Problem size")
         ("multithreaded,M", "use multi thread mode")
+        ("statictransition,S", "take advantage of static transitions")
         ;
 
     po::variables_map vm;
@@ -132,21 +135,11 @@ int main(int argc, char **argv) {
       return 1;
     }
 
-    if (vm.count("train")) {
-      train = true;
-    }
-
-    if (vm.count("profile")) {
-      profile = true;
-    }
-
-    if (vm.count("verbose")) {
-      verbose = true;
-    }
-
-    if (vm.count("multithreaded")) {
-      multithreaded = true;
-    }
+    train = vm.count("train");
+    profile = vm.count("profile");
+    verbose = vm.count("verbose");
+    multithreaded = vm.count("multithreaded");
+    useStaticTransition = vm.count("statictransition");
 
     if (vm.count("monte-carlo")) {
       algorithm = ALG_MonteCarlo;
@@ -212,7 +205,7 @@ int main(int argc, char **argv) {
 
       double reward = 0.0;
       if (algorithm == ALG_HierarchicalFSM) {
-        reward = system.simulateFSM(*static_cast<HierarchicalFSMAgent*>(agent), verbose);
+        reward = system.simulateFSM(*static_cast<HierarchicalFSMAgent*>(agent), verbose, useStaticTransition);
       }
       else {
         reward = system.simulate(*agent, verbose);
@@ -249,7 +242,7 @@ int main(int argc, char **argv) {
     Agent *agent = CreatorAgent(algorithm, false);
 
     if (algorithm == ALG_HierarchicalFSM) {
-      cout << "Reward: " << System().simulateFSM(*static_cast<HierarchicalFSMAgent*>(agent), verbose) << endl;
+      cout << "Reward: " << System().simulateFSM(*static_cast<HierarchicalFSMAgent*>(agent), verbose, useStaticTransition) << endl;
     }
     else {
       cout << "Reward: " << System().simulate(*agent, verbose) << endl;
@@ -261,8 +254,8 @@ int main(int argc, char **argv) {
     int num_threads = 1;
     if (multithreaded) num_threads = thread::hardware_concurrency();
 
-    const int trials = 100;
-    const int episodes = 2500;
+    const int trials = 1000;
+    const int episodes = 5000;
 
     vector<double> rewards(episodes, 0.0), time;
     double avg_time = 0.0;
@@ -280,7 +273,8 @@ int main(int argc, char **argv) {
           &avg_time,
           episodes,
           trials,
-          verbose);
+          verbose,
+          useStaticTransition);
     }
 
     //Join the threads with the main thread
@@ -290,7 +284,9 @@ int main(int argc, char **argv) {
 
     for (int i = 0; i < episodes; ++i) {
       rewards[i] /= trials;
-      cout << rewards[i] << endl;
+      if (i % 100 == 0) {
+        cout << rewards[i] << endl;
+      }
     }
 
     double sum_time = 0.0;

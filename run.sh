@@ -19,11 +19,17 @@
 
 set -o nounset                              # Treat unset variables as an error
 
+SIZE="5"
+
+make clean
 make release
+mkdir data
+cd data
 
-for alg in H; do
-    time ./maxq_op -Mt -$alg > $alg.out
-done
+time ../maxq_op -n $SIZE -Mt -H > H.out &
+time ../maxq_op -n $SIZE -Mt -HS > HS.out &
 
-gnuplot -p plot.gnuplot
+wait
+
+gnuplot -p ../plot.gnuplot
 

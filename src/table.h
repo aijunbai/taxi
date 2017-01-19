@@ -69,7 +69,7 @@ public:
 
 		is >> size;
 		for (uint i = 0; i < size; ++i) {
-			is >> key >> data;
+//			is >> key >> data; FIXME
 			o[key] = data;
 		}
 

@@ -166,5 +166,6 @@ set psdir
 set fit brief errorvariables nocovariancevariables errorscaling prescale nowrap v5
 GNUTERM = "wxt"
 x = 0.0
-plot 'H.out' t 'hierarchicalfsm' w l
+set log x
+plot 'H.out' t 'hierarchicalfsm' w l, 'HS.out' t 'hierarchicalfsm-det' w l
 #    EOF

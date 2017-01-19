@@ -19,4 +19,4 @@ clean:
 		cd Debug; make clean; \
 	fi
 	rm -f maxq_op
-	rm -f *.tbl
+	rm -fr *.tbl data/

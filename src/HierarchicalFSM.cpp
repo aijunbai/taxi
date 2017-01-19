@@ -54,14 +54,15 @@ void Root::run(const vector<string> & parameters) {
   if (running()) {
     Runner(put).operator()();
   }
-  agent->Qupdate(state(), machineState(), 1);
+  agent->Qupdate(state(), machineState(), 1, agent->steps);
 }
 
 Primitive::Primitive(HierarchicalFSMAgent *p, Action a, string name): HierarchicalFSM(p, "$" + name) {
   action = a;
 }
 
-Primitive::~Primitive() { }
+Primitive::~Primitive() {
+}
 
 void Primitive::run(const vector<string> & parameters) {
   Actuator(this, {to_prettystring(action)}).operator()(action);
@@ -117,7 +118,8 @@ Navigate::Navigate(HierarchicalFSMAgent *p): HierarchicalFSM(p, "$Nav") {
   west = new Primitive(p, West, action_name(West));
   north = new Primitive(p, North, action_name(North));
 
-  choice = new ChoicePoint<HierarchicalFSM *>("@Nav", {east, south, west, north});
+  dir_choice = new ChoicePoint<HierarchicalFSM *>("@Dir", {east, south, west, north});
+  step_choice = new ChoicePoint<int>("@Step", {1, 2, 3, 4});
 }
 
 Navigate::~Navigate() {
@@ -126,7 +128,8 @@ Navigate::~Navigate() {
   delete west;
   delete north;
 
-  delete choice;
+  delete dir_choice;
+  delete step_choice;
 }
 
 void Navigate::run(const vector<string> & parameters) {
@@ -134,9 +137,15 @@ void Navigate::run(const vector<string> & parameters) {
   TaxiEnv::Position target = agent->env()->terminal(i);
 
   while (running() && agent->env()->taxi() != target) {
-    MakeChoice<HierarchicalFSM *> c(this, choice);
-    auto m = c();
-    Runner(m).operator()();
+    MakeChoice<HierarchicalFSM *> c1(this, dir_choice);
+    MakeChoice<int> c2(this, step_choice);
+
+    auto m = c1();
+    auto n = c2();
+
+    for (int i = 0; i < n; ++i) {
+      Runner(m).operator()();
+    }
   }
 }
 

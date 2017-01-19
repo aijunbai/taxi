@@ -7,103 +7,111 @@
 #include <list>
 #include <vector>
 #include <string>
-#include <map>
+#include <unordered_map>
 #include <iostream>
 
-namespace dot{
+namespace dot {
 
-struct Label{
-	std::string label;
+struct Label {
+  std::string label;
 
-	Label() {
+  Label() {
 
-	}
+  }
 
-	Label(const std::string& str) {
-		label = str;
-	}
+  Label(const std::string &str) {
+    label = str;
+  }
 
-	friend std::ostream& operator <<(std::ostream &os, const Label &l)
-	{
-		if (l.label.length()) {
-			return os << "[label=\"" << l.label << "\"]";
-		}
-		else {
-			return os;
-		}
-	}
+  friend std::ostream &operator<<(std::ostream &os, const Label &l) {
+    if (l.label.length()) {
+      return os << "[label=\"" << l.label << "\"]";
+    } else {
+      return os;
+    }
+  }
 };
 
-struct Color{
-	std::string color;
+struct Color {
+  std::string color;
 
-	Color() {
+  Color() {
 
-	}
+  }
 
-	Color(const std::string& str){
-		color = str;
-	}
+  Color(const std::string &str) {
+    color = str;
+  }
 
-	friend std::ostream& operator <<(std::ostream &os, const Color &c)
-	{
-		if (c.color.length()) {
-			return os << "[color=\"" << c.color << "\"]";
-		}
-		else {
-			return os;
-		}
-	}
+  friend std::ostream &operator<<(std::ostream &os, const Color &c) {
+    if (c.color.length()) {
+      return os << "[color=\"" << c.color << "\"]";
+    } else {
+      return os;
+    }
+  }
 };
 
 struct Edge {
-	Color color;
-	Label label;
+  Color color;
+  Label label;
 };
 
-class Node{
+class Node {
 public:
-	int id;
-	Label label;
-	Color color;
+  int id;
+  Label label;
+  Color color;
 
-	std::map<int, Edge> neighbours;
+  std::unordered_map<int, Edge> neighbours;
 
-	Node() {
-	}
+  Node() {
+  }
 
-	Node(int i, Label l) {
-		id = i; label = l;
-	}
+  Node(int i, Label l) {
+    id = i;
+    label = l;
+  }
 
-	void setColor(const std::string& str) {
-		color = Color(str);
-	}
+  void setColor(const std::string &str) {
+    color = Color(str);
+  }
 
-	void addNeighbor(const int n, const std::string& edge_color, const std::string& edge_label);
+  void addNeighbor(const int n, const std::string &edge_color, const std::string &edge_label);
 
-	friend std::ostream& operator <<(std::ostream & os, const Node &n)
-	{
-		os << n.id << " " << n.label ;
-		if (n.color.color.length()) {
-			os << n.color;
-		}
-		return os;
-	}
+  friend std::ostream &operator<<(std::ostream &os, const Node &n) {
+    os << n.id << " " << n.label;
+    if (n.color.color.length()) {
+      os << n.color;
+    }
+    return os;
+  }
 };
 
-class Graph{
-	std::vector<Node> nodes;
-	std::map<std::string, int>  id_map;
+class Graph {
+  std::vector<Node> nodes;
+
 public:
-	Graph();
+  const std::vector<Node> &getNodes() const;
 
-	void addNode(const std::string& name, const std::string& color = "");
-	void addNode(const int n, const std::string& color = "");
-	void addEdge(const std::string& a, const std::string& b, const std::string& color = "", const std::string& label = "");
-	void addEdge(const int a, const int b, const std::string& color = "", const std::string& label = "");
+private:
+  std::unordered_map<std::string, int> id_map;
 
-	friend std::ostream& operator <<(std::ostream &os, const Graph &g);
+public:
+  Graph();
+
+  void addNode(const std::string &name, const std::string &color = "");
+
+  void addNode(const int n, const std::string &color = "");
+
+  void
+  addEdge(const std::string &a, const std::string &b, const std::string &color = "", const std::string &label = "");
+
+  void addEdge(const int a, const int b, const std::string &color = "", const std::string &label = "");
+
+  friend std::ostream &operator<<(std::ostream &os, const Graph &g);
+
+  void dump(const std::string &filename);
 };
 
 } //namspace dot_graph

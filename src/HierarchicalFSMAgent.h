@@ -6,25 +6,37 @@
 #define MAXQ_OP_HIERARCHICALFSMAGENT_H
 
 #include "agent.h"
+#include "dot_graph.h"
+
+#include <boost/archive/xml_iarchive.hpp>
+#include <boost/archive/xml_oarchive.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/unordered_map.hpp>
+#include <boost/serialization/string.hpp>
+#include <boost/algorithm/string/replace.hpp>
+
 
 using namespace std;
 
 class HierarchicalFSMAgent: public Agent {
 public:
-  HierarchicalFSMAgent(const bool test): Agent(test), name_("hierarchicalfsm") {
-    max_steps = 1024;
-    verbose = false;
+  HierarchicalFSMAgent(const bool test);
 
-    reset();
+  virtual ~HierarchicalFSMAgent();
+
+  string name() {
+    string name = "hierarchicalfsm";
+    if (useStaticTransition) name += "-det";
+    return name;
   }
 
-  virtual ~HierarchicalFSMAgent() {
-    if (!test()) {
-      for (auto &pa : qtable_) {
-        pa.second.save(name_ + "_" + pa.first);
-      }
-    }
-  }
+  void setUseStaticTransition(bool useStaticTransition);
+
+  bool isUseStaticTransition() const;
+
+  void saveStaticTransitions(string filename);
+
+  void loadStaticTransitions(string filename);
 
   void setMax_steps(int max_steps);
 
@@ -51,12 +63,14 @@ public:
   vector<string> stack;
   State lastState;
   int lastChoice;
+  int lastChoiceTime;
   string lastMachineState;
-  unordered_map<string, StateActionPairTable<double>> qtable_;
+  unordered_map<State, unordered_map<string, unordered_map<int, double>>> qtable_;
 
 public:
   int max_steps;
   bool verbose;
+  bool useStaticTransition;
 
   double epsilon;
   double alpha;
@@ -67,27 +81,35 @@ public:
   double accumulatedRewards;
   double accumulatedDiscount;
 
-  const std::string name_;
-
 public:
   string getMachineState() const {
     return to_prettystring(stack);
   }
 
-  double & Q(const State &state, const string &machineState, int action) {
-    return qtable_[machineState].operator()(state, action);
-  }
+  double & Q(const State &state, const string &machineState, int choice);
 
   double & V(const State &state, const string &machineState, int numChoices);
 
   int selectChoice(const State &state, const string &machineState, int numChoices);
   int argmaxQ(const State &state, const string &machineState, int numChoices);
 
-  int Qupdate(const State &state, const string &machineState, int numChoices);
+  int Qupdate(const State &state, const string &machineState, int numChoices, int current_time);
 
 public:
   void PushStack(const string &s);
   void PopStack();
+
+private:
+  unordered_map<string, \
+    unordered_map<int, \
+        unordered_map<string, double>>> staticTransitions;
+  unordered_map<string, int> numChoicesMap;
+
+public:
+  bool isStaticTransition(const string &machine_state, int c);
+  bool hasCircle(unordered_map<string, \
+    unordered_map<int, \
+        unordered_map<string, double>>> &G);
 };
 
 
