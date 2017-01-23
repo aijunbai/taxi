@@ -18,13 +18,7 @@ class Agent;
 
 class System {
 public:
-	System() {
-		env_.reset();
-	}
-
-	System(const State & state) {
-		env_.set(state);
-	}
+	System() { }
 
 	double simulate(Agent & agent, bool verbose);
 	double simulateFSM(HierarchicalFSMAgent & agent, bool verbose, bool useStaticTransition);

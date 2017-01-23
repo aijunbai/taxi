@@ -12,5 +12,5 @@ double TemporalDifferenceAgent::gamma = 1.0 - 1.0e-6;
 
 double & TemporalDifferenceAgent::qvalue(const State & state, const int & action)
 {
-	return qtable_(state, action);
+	return qtable_[state][action];
 }

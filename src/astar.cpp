@@ -48,14 +48,14 @@ std::pair<State, double> AStarAgent::apply(State state, const Action action)
 	case South:
 	case East:
 	case West:
-		taxi = taxi + TaxiEnv::model->delta_[taxi.x][taxi.y][action];
+		taxi = taxi + TaxiEnv::EnvModel::ins().delta_[taxi.x][taxi.y][action];
 		state.x() = taxi.x;
 		state.y() = taxi.y;
 		cost = 1.0;
 		break;
 	case Pickup:
-		if (state.passenger() != int(TaxiEnv::model->terminals().size()) && taxi == TaxiEnv::model->terminals()[state.passenger()]) {
-			state.passenger() = int(TaxiEnv::model->terminals().size());
+		if (state.passenger() != int(TaxiEnv::EnvModel::ins().terminals().size()) && taxi == TaxiEnv::EnvModel::ins().terminals()[state.passenger()]) {
+			state.passenger() = int(TaxiEnv::EnvModel::ins().terminals().size());
 			cost = 1.0;
 		}
 		else {
@@ -63,7 +63,7 @@ std::pair<State, double> AStarAgent::apply(State state, const Action action)
 		}
 		break;
 	case Putdown:
-		if (state.passenger() == int(TaxiEnv::model->terminals().size()) && taxi == TaxiEnv::model->terminals()[state.destination()]) {
+		if (state.passenger() == int(TaxiEnv::EnvModel::ins().terminals().size()) && taxi == TaxiEnv::EnvModel::ins().terminals()[state.destination()]) {
 			state.passenger() = state.destination();
 			cost = /*20.0*/0.0;
 		}

@@ -1,9 +1,9 @@
 #!/bin/bash - 
 #===============================================================================
 #
-#          FILE: run.sh
+#          FILE: memcheck.sh
 # 
-#         USAGE: ./run.sh 
+#         USAGE: ./memcheck.sh 
 # 
 #   DESCRIPTION: 
 # 
@@ -13,26 +13,14 @@
 #         NOTES: ---
 #        AUTHOR: Aijun Bai (), 
 #  ORGANIZATION: 
-#       CREATED: 01/15/2017 10:37
+#       CREATED: 01/23/2017 13:12
 #      REVISION:  ---
 #===============================================================================
 
 set -o nounset                              # Treat unset variables as an error
 
-SIZE="5"
-PLT="plot.gnuplot"
-
 make clean
-make release
-mkdir data
-cd data
+make debug
 
-cp ../${PLT} .
-for alg in H HS; do
-    time ../maxq_op -n $SIZE -Mt -${alg} > ${alg}.out
-    echo "'${alg}.out' w l, \\" >> ${PLT}
-done
-
-gnuplot -p ${PLT}
-
+valgrind ./maxq_op -n 5 -Mt -HS 2>&1 | tee -a valgrind.log
 

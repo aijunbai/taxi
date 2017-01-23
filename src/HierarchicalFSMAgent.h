@@ -65,7 +65,7 @@ public:
   int lastChoice;
   int lastChoiceTime;
   string lastMachineState;
-  unordered_map<State, unordered_map<string, unordered_map<int, double>>> qtable_;
+  HashMap<State, HashMap<string, HashMap<int, double>>> qtable_;
 
 public:
   int max_steps;
@@ -100,16 +100,16 @@ public:
   void PopStack();
 
 private:
-  unordered_map<string, \
-    unordered_map<int, \
-        unordered_map<string, double>>> staticTransitions;
-  unordered_map<string, int> numChoicesMap;
+  HashMap<string, \
+    HashMap<int, \
+        HashMap<string, double>>> staticTransitions;
+  HashMap<string, int> numChoicesMap;
 
 public:
   bool isStaticTransition(const string &machine_state, int c);
-  bool hasCircle(unordered_map<string, \
-    unordered_map<int, \
-        unordered_map<string, double>>> &G);
+  bool hasCircle(HashMap<string, \
+    HashMap<int, \
+        HashMap<string, double>>> &G);
 };
 
 

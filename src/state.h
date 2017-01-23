@@ -14,6 +14,7 @@
 #include "boost/tuple/tuple.hpp"
 #include "boost/tuple/tuple_comparison.hpp"
 #include "boost/tuple/tuple_io.hpp"
+#include <ostream>
 
 #include <string>
 #include <sstream>
@@ -45,25 +46,34 @@ auto operator<<(std::basic_ostream<Ch, Tr>& os, std::tuple<Args...> const& t)
   return os << ")";
 }
 
-class State: public tuple<int, int, int, int> {
+class State: public tuple<int, int, int, int, int> {
 public:
   State() {}
 
-  State(const int & a, const int & b, const int & c, const int & d);
+  State(int a, int b, int c, int d, int e);
 
   int x() const;
   int y() const;
   int passenger() const;
-  int destination() const ;
+  int destination() const;
+  int fuel() const;
 
   int& x();
   int& y();
   int& passenger();
   int& destination();
+  int& fuel();
 
-  bool terminate() const;
+  bool terminated() const;
 
   std::string str() const;
+
+  friend ostream &operator<<(ostream &os, const State &o);
+
+  enum {
+    MIN_FUEL = 12,
+    MAX_FUEL = 24
+  };
 };
 
 namespace std {
@@ -120,7 +130,7 @@ struct hash<State>
 {
   std::size_t operator()(const State& k) const
   {
-    return hash<tuple<int, int, int, int>>().operator()(k);
+    return hash<tuple<int, int, int, int, int>>().operator()(k);
   }
 };
 

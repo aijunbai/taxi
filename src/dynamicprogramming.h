@@ -30,8 +30,7 @@ private:
 	double UpdateQValue(const State & state, Action action);
 
 	pair<double, Action> Greedy(const State & state);
-
-	StateActionPairTable<double> qtable_;
+	HashMap<State, HashMap<int, double>> qtable_;
 };
 
 #endif /* VALUEITER_H_ */

@@ -71,7 +71,7 @@ Action UCTAgent::UCB1(const State & state, const double exploration)
 
 double UCTAgent::MCTS(const State& state, const int depth) //FIXME: no rollout phase!
 {
-	if (state.terminate() || depth > 1.0 / (1.0 - gamma)) {
+	if (state.terminated() || depth > 1.0 / (1.0 - gamma)) {
 #if DEBUG
 		std::cerr << "[" << state << "]";
 #endif
@@ -107,7 +107,7 @@ double UCTAgent::MCTS(const State& state, const int depth) //FIXME: no rollout p
 double UCTAgent::Rollout(State state, int depth)
 {
   double sum = 0.0;
-  while (depth < 1.0 / (1.0 - gamma) && !state.terminate()) {
+  while (depth < 1.0 / (1.0 - gamma) && !state.terminated()) {
     Action action = Action(rand() % ActionSize);
     std::pair<State, double> sample = TaxiEnv::Sample(state, action);
     state = sample.first;

@@ -42,17 +42,24 @@ string HierarchicalFSM::getStackStr() {
 Root::Root(HierarchicalFSMAgent *p): HierarchicalFSM(p, "$Root") {
   get = new Get(p);
   put = new Put(p);
+  refuel = new Refuel(p);
+
+  choice = new ChoicePoint<HierarchicalFSM *>("@Root", {get, put, refuel});
 }
 
 Root::~Root() {
   delete get;
   delete put;
+  delete refuel;
+
+  delete choice;
 }
 
 void Root::run(const vector<string> & parameters) {
-  Runner(get).operator()();
-  if (running()) {
-    Runner(put).operator()();
+  while (running()) {
+    MakeChoice<HierarchicalFSM *> c(this, choice);
+    auto m = c();
+    Runner(m).operator()();
   }
   agent->Qupdate(state(), machineState(), 1, agent->steps);
 }
@@ -83,11 +90,16 @@ Get::~Get() {
 }
 
 void Get::run(const vector<string> & parameters) {
-  while (running() && !agent->env()->loaded()) {
-    MakeChoice<HierarchicalFSM *> c(this, choice);
-    auto m = c();
-    Runner(m, {to_string(state().passenger())}).operator()();
+  Runner(nav, {to_string(state().passenger())}).operator()();
+  if (running()) {
+    Runner(pickup).operator()();
   }
+
+//  while (running() && !agent->env()->loaded()) {
+//    MakeChoice<HierarchicalFSM *> c(this, choice);
+//    auto m = c();
+//    Runner(m, {to_string(state().passenger())}).operator()();
+//  }
 }
 
 Put::Put(HierarchicalFSMAgent *p): HierarchicalFSM(p, "$Put") {
@@ -105,20 +117,52 @@ Put::~Put() {
 }
 
 void Put::run(const vector<string> & parameters) {
-  while (running() && !agent->env()->unloaded()) {
-    MakeChoice<HierarchicalFSM *> c(this, choice);
-    auto m = c();
-    Runner(m, {to_string(state().destination())}).operator()();
+  Runner(nav, {to_string(state().destination())}).operator()();
+  if (running()) {
+    Runner(putdown).operator()();
   }
+
+//  while (running() && !agent->env()->unloaded()) {
+//    MakeChoice<HierarchicalFSM *> c(this, choice);
+//    auto m = c();
+//    Runner(m, {to_string(state().destination())}).operator()();
+//  }
+}
+
+Refuel::Refuel(HierarchicalFSMAgent *p): HierarchicalFSM(p, "$Refuel") {
+  fillup = new Primitive(p, Fillup, action_name(Fillup));
+  nav = new Navigate(p);
+
+  choice = new ChoicePoint<HierarchicalFSM *>("@Get", {fillup, nav});
+}
+
+Refuel::~Refuel() {
+  delete fillup;
+  delete nav;
+
+  delete choice;
+}
+
+void Refuel::run(const vector<string> & parameters) {
+  Runner(nav, {"F"}).operator()();
+  if (running()) {
+    Runner(fillup).operator()();
+  }
+
+//  while (running() && !agent->env()->loaded()) {
+//    MakeChoice<HierarchicalFSM *> c(this, choice);
+//    auto m = c();
+//    Runner(m, {"F"}).operator()();
+//  }
 }
 
 Navigate::Navigate(HierarchicalFSMAgent *p): HierarchicalFSM(p, "$Nav") {
-  east = new Primitive(p, East, action_name(East));
-  south = new Primitive(p, South, action_name(South));
-  west = new Primitive(p, West, action_name(West));
   north = new Primitive(p, North, action_name(North));
+  south = new Primitive(p, South, action_name(South));
+  east = new Primitive(p, East, action_name(East));
+  west = new Primitive(p, West, action_name(West));
 
-  dir_choice = new ChoicePoint<HierarchicalFSM *>("@Dir", {east, south, west, north});
+  dir_choice = new ChoicePoint<HierarchicalFSM *>("@Dir", {north, south, east, west});
   step_choice = new ChoicePoint<int>("@Step", {1, 2, 3, 4});
 }
 
@@ -133,17 +177,17 @@ Navigate::~Navigate() {
 }
 
 void Navigate::run(const vector<string> & parameters) {
-  auto i = atoi(parameters[0].c_str());
-  TaxiEnv::Position target = agent->env()->terminal(i);
+  char c = parameters[0][0];
+  TaxiEnv::Position target = c == 'F'? TaxiEnv::EnvModel::ins().getFuel_() : agent->env()->terminal(c - '0');
 
   while (running() && agent->env()->taxi() != target) {
     MakeChoice<HierarchicalFSM *> c1(this, dir_choice);
-    MakeChoice<int> c2(this, step_choice);
-
     auto m = c1();
-    auto n = c2();
 
-    for (int i = 0; i < n; ++i) {
+//    MakeChoice<int> c2(this, step_choice);
+//    auto n = c2();
+
+    for (int i = 0; i < 1 /*n*/; ++i) {
       Runner(m).operator()();
     }
   }

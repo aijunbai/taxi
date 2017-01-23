@@ -30,9 +30,9 @@ public:
     static double Confidence(int t, int n);
 
 private:
-	StateActionPairTable<double> qtable_;
-	Table<State, int> state_counts_;
-	StateActionPairTable<int> state_action_counts_;
+	HashMap<State, HashMap<int, double>> qtable_;
+	HashMap<State, int> state_counts_;
+	HashMap<State, HashMap<int, int>> state_action_counts_;
 
 	static const double gamma;
 };

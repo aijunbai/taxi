@@ -33,7 +33,7 @@ private:
 	void backup(const State & state, int action, double reward, double post_value);
 
 private:
-	std::map<state_action_pair_t, double> eligibility_;
+	std::map<std::pair<State, int>, double> eligibility_;
 };
 
 

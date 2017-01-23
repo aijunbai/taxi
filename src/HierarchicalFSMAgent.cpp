@@ -74,7 +74,7 @@ void HierarchicalFSMAgent::step(Action a) {
 }
 
 bool HierarchicalFSMAgent::running() {
-  bool ret = !env()->terminate() && steps < max_steps;
+  bool ret = !env()->terminated() && steps < max_steps;
 
   if (!ret) {
     if (verbose) {
@@ -94,12 +94,12 @@ void HierarchicalFSMAgent::reset() {
   epsilon = 0.01;
   alpha = 0.125;
   rewards = 0.0;
-  gamma = 0.95;
+  gamma = 1.0;
   steps = 0;
   accumulatedRewards = 0.0;
   accumulatedDiscount = 1.0;
 
-  lastState = {0, 0, 0, 0};
+  lastState = {0, 0, 0, 0, 0};
   lastChoice = 0;
   lastChoiceTime = -1;
   stack.clear();
@@ -208,10 +208,10 @@ int HierarchicalFSMAgent::Qupdate(
 namespace {
 bool dfs(
     const string &root,
-    unordered_map<string,
-        unordered_map<int, unordered_map<string, double>>> &G,
-    unordered_set<string> &visited,
-    unordered_set<string> &path) {
+    HashMap<string,
+        HashMap<int, HashMap<string, double>>> &G,
+    HashSet<string> &visited,
+    HashSet<string> &path) {
   if (path.count(root)) {
     return true;
   }
@@ -230,13 +230,13 @@ bool dfs(
 };
 }
 
-bool HierarchicalFSMAgent::hasCircle(unordered_map<string, \
-    unordered_map<int, \
-        unordered_map<string, double>>> &G)
+bool HierarchicalFSMAgent::hasCircle(HashMap<string, \
+    HashMap<int, \
+        HashMap<string, double>>> &G)
 {
-  unordered_set<string> visited;
+  HashSet<string> visited;
   for (auto &pa : G) {
-    unordered_set<string> path;
+    HashSet<string> path;
     if (!visited.count(pa.first) && dfs(pa.first, G, visited, path))
       return true;
   }
@@ -278,17 +278,17 @@ double & HierarchicalFSMAgent::Q(const State &state, const string &machineState,
 }
 
 void HierarchicalFSMAgent::saveStaticTransitions(string filename) {
-  std::ofstream ofs(filename);
-  boost::archive::xml_oarchive oa(ofs);
-  oa << BOOST_SERIALIZATION_NVP(numChoicesMap);
-  oa << BOOST_SERIALIZATION_NVP(staticTransitions);
+//  std::ofstream ofs(filename);
+//  boost::archive::xml_oarchive oa(ofs);
+//  oa << BOOST_SERIALIZATION_NVP(numChoicesMap);
+//  oa << BOOST_SERIALIZATION_NVP(staticTransitions);
 }
 
 void HierarchicalFSMAgent::loadStaticTransitions(string filename) {
-  std::ifstream ifs(filename);
-  if (!ifs.good())
-    return;
-  boost::archive::xml_iarchive ia(ifs);
-  ia >> BOOST_SERIALIZATION_NVP(numChoicesMap);
-  ia >> BOOST_SERIALIZATION_NVP(staticTransitions);
+//  std::ifstream ifs(filename);
+//  if (!ifs.good())
+//    return;
+//  boost::archive::xml_iarchive ia(ifs);
+//  ia >> BOOST_SERIALIZATION_NVP(numChoicesMap);
+//  ia >> BOOST_SERIALIZATION_NVP(staticTransitions);
 }

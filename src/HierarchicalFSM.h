@@ -81,6 +81,9 @@ public:
 private:
   HierarchicalFSM *get;
   HierarchicalFSM *put;
+  HierarchicalFSM *refuel;
+
+  ChoicePoint<HierarchicalFSM *> *choice;
 };
 
 class Primitive: public HierarchicalFSM {
@@ -106,6 +109,19 @@ private:
   ChoicePoint<HierarchicalFSM *> *choice;
 };
 
+class Refuel: public HierarchicalFSM {
+public:
+  Refuel(HierarchicalFSMAgent *p);
+  virtual ~Refuel();
+  virtual void run(const vector<string> & parameters = {});
+
+private:
+  HierarchicalFSM *fillup;
+  HierarchicalFSM *nav;
+
+  ChoicePoint<HierarchicalFSM *> *choice;
+};
+
 class Put: public HierarchicalFSM {
 public:
   Put(HierarchicalFSMAgent *p);
@@ -126,10 +142,10 @@ public:
   virtual void run(const vector<string> & parameters = {});
 
 private:
-  HierarchicalFSM *east;
-  HierarchicalFSM *south;
-  HierarchicalFSM *west;
   HierarchicalFSM *north;
+  HierarchicalFSM *south;
+  HierarchicalFSM *east;
+  HierarchicalFSM *west;
 
   ChoicePoint<HierarchicalFSM *> *dir_choice;
   ChoicePoint<int> *step_choice;

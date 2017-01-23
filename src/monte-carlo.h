@@ -19,13 +19,9 @@
 class MonteCarloAgent: public RLAgent {
 public:
 	MonteCarloAgent(const bool test): RLAgent(test) {
-		monte_carlo_.load("monte-carlo");
 	}
 
 	virtual ~MonteCarloAgent() {
-		if (!test()) {
-			monte_carlo_.save("monte-carlo");
-		}
 	}
 
 	double & qvalue(const State &, const int &);
@@ -34,8 +30,8 @@ public:
 	virtual void terminate(const State & state, int action, double reward);
 
 private:
-	std::list<std::pair<state_action_pair_t, double> > history_;
-	StateActionPairTable<boost::tuples::tuple<double, u_int64_t> > monte_carlo_;
+	std::list<std::pair<std::pair<State, int>, double> > history_;
+	HashMap<State, HashMap<int, boost::tuples::tuple<double, u_int64_t>>> monte_carlo_;
 };
 
 #endif /* MONTE_CARLO_H_ */

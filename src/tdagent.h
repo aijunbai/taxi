@@ -23,19 +23,15 @@ public:
 
 public:
 	TemporalDifferenceAgent(const std::string name, const bool test): RLAgent(test), name_(name) {
-		qtable_.load(name_);
 	}
 
 	virtual ~TemporalDifferenceAgent() {
-		if (!test()) {
-			qtable_.save(name_);
-		}
 	}
 
 	double & qvalue(const State &, const int &);
 
 private:
-	StateActionPairTable<double> qtable_;
+	HashMap<State, HashMap<int, double>> qtable_;
 	const std::string name_;
 };
 

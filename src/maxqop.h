@@ -113,13 +113,13 @@ private:
 			State tmp(state);
 
 			if (action_ == Get_T) {
-				tmp.x() = TaxiEnv::model->terminals()[state.passenger()].x;
-				tmp.y() = TaxiEnv::model->terminals()[state.passenger()].y;
-				tmp.passenger() = TaxiEnv::model->terminals().size();
+				tmp.x() = TaxiEnv::EnvModel::ins().terminals()[state.passenger()].x;
+				tmp.y() = TaxiEnv::EnvModel::ins().terminals()[state.passenger()].y;
+				tmp.passenger() = TaxiEnv::EnvModel::ins().terminals().size();
 			}
 			else if (action_ == Put_T) {
-				tmp.x() = TaxiEnv::model->terminals()[state.destination()].x;
-				tmp.y() = TaxiEnv::model->terminals()[state.destination()].y;
+				tmp.x() = TaxiEnv::EnvModel::ins().terminals()[state.destination()].x;
+				tmp.y() = TaxiEnv::EnvModel::ins().terminals()[state.destination()].y;
 				tmp.passenger() = state.destination();
 			}
 			else {
@@ -145,8 +145,8 @@ private:
 			switch (action_) {
 			case Pickup_T:
 				if (task_ == Get_T) {
-					if (TaxiEnv::Position(state.x(), state.y()) == TaxiEnv::model->terminals()[state.passenger()]) {
-						tmp.passenger() = TaxiEnv::model->terminals().size();
+					if (TaxiEnv::Position(state.x(), state.y()) == TaxiEnv::EnvModel::ins().terminals()[state.passenger()]) {
+						tmp.passenger() = TaxiEnv::EnvModel::ins().terminals().size();
 					}
 				}
 				else {
@@ -156,8 +156,8 @@ private:
 
 			case Putdown_T:
 				if (task_ == Put_T) {
-					if (state.passenger() == int(TaxiEnv::model->terminals().size()) && TaxiEnv::Position(state.x(), state.y()) ==
-                                                                              TaxiEnv::model->terminals()[state.destination()]) {
+					if (state.passenger() == int(TaxiEnv::EnvModel::ins().terminals().size()) && TaxiEnv::Position(state.x(), state.y()) ==
+                                                                              TaxiEnv::EnvModel::ins().terminals()[state.destination()]) {
 						tmp.passenger() = state.destination();
 					}
 				}
@@ -167,23 +167,23 @@ private:
 				break;
 
 			case NavB_T:
-				tmp.x() = TaxiEnv::model->terminals()[2].x;
-				tmp.y() = TaxiEnv::model->terminals()[2].y;
+				tmp.x() = TaxiEnv::EnvModel::ins().terminals()[2].x;
+				tmp.y() = TaxiEnv::EnvModel::ins().terminals()[2].y;
 				break;
 
 			case NavY_T:
-				tmp.x() = TaxiEnv::model->terminals()[0].x;
-				tmp.y() = TaxiEnv::model->terminals()[0].y;
+				tmp.x() = TaxiEnv::EnvModel::ins().terminals()[0].x;
+				tmp.y() = TaxiEnv::EnvModel::ins().terminals()[0].y;
 				break;
 
 			case NavR_T:
-				tmp.x() = TaxiEnv::model->terminals()[1].x;
-				tmp.y() = TaxiEnv::model->terminals()[1].y;
+				tmp.x() = TaxiEnv::EnvModel::ins().terminals()[1].x;
+				tmp.y() = TaxiEnv::EnvModel::ins().terminals()[1].y;
 				break;
 
 			case NavG_T:
-				tmp.x() = TaxiEnv::model->terminals()[3].x;
-				tmp.y() = TaxiEnv::model->terminals()[3].y;
+				tmp.x() = TaxiEnv::EnvModel::ins().terminals()[3].x;
+				tmp.y() = TaxiEnv::EnvModel::ins().terminals()[3].y;
 				break;
 
 			default: assert(0); break;
@@ -258,7 +258,7 @@ private:
 			State tmp(state);
 
 			for (int i = 0; i < 3; ++i) {
-				locations[i] = locations[i] + TaxiEnv::model->delta_[locations[i].x][locations[i].y][actions[i]];
+				locations[i] = locations[i] + TaxiEnv::EnvModel::ins().delta_[locations[i].x][locations[i].y][actions[i]];
 
 				tmp.x() = locations[i].x;
 				tmp.y() = locations[i].y;
@@ -269,7 +269,7 @@ private:
 			Action action = translate_primitive(action_); //maximal likelihood action
 			TaxiEnv::Position location(state.x(), state.y());
 
-			location = location + TaxiEnv::model->delta_[location.x][location.y][action];
+			location = location + TaxiEnv::EnvModel::ins().delta_[location.x][location.y][action];
 
 			State tmp(state);
 
@@ -289,7 +289,7 @@ private:
 	map<Task, map<Task, TransitionFunc*> > maxq_;
 	int max_depth_[TaskSize];
 
-	Table<State, std::pair<ValuePrimitiveActionPair, int> > cache_[TaskSize];
+	HashMap<State, std::pair<ValuePrimitiveActionPair, int> > cache_[TaskSize];
 
 	private:
 	void DumpSearchTree();

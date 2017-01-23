@@ -16,7 +16,7 @@ using namespace std;
 
 double System::simulate(Agent & agent, bool verbose)
 {
-	const int max_steps = 1024;
+	const int max_steps = 4096;
 
 	env_.reset();
 
@@ -36,7 +36,7 @@ double System::simulate(Agent & agent, bool verbose)
 		double reward = env_.step(action); //taking action
 		rewards += reward;
 
-		if (env_.terminate() || step >= max_steps) {
+		if (env_.terminated() || step >= max_steps) {
 			if (!agent.test()) {
 				agent.terminate(state, action, reward);
 			}
@@ -79,15 +79,15 @@ double System::simulate(Agent & agent, bool verbose)
 
 double System::simulateFSM(HierarchicalFSMAgent & agent, bool verbose, bool useStaticTransition)
 {
-  const int max_steps = 1024;
+  const int max_steps = 4096;
 
   agent.setEnv(&env_);
   agent.setMax_steps(max_steps);
   agent.setVerbose(verbose);
   agent.setUseStaticTransition(useStaticTransition);
 
-  agent.reset();
   env_.reset();
+  agent.reset();
 
   double rewards = agent.run();
   return rewards;

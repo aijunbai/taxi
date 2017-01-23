@@ -12,12 +12,12 @@
 
 double & MonteCarloAgent::qvalue(const State & state, const int & action)
 {
-	return monte_carlo_(state, action).get<0>();
+	return monte_carlo_[state][action].get<0>();
 }
 
 void MonteCarloAgent::learn(const State & state, int action, double reward, const State &, int)
 {
-	history_.push_back(std::make_pair(boost::tuples::make_tuple(state, action), reward));
+	history_.push_back(std::make_pair(std::make_pair(state, action), reward));
 }
 
 /**
@@ -28,12 +28,12 @@ void MonteCarloAgent::learn(const State & state, int action, double reward, cons
  */
 void MonteCarloAgent::terminate(const State & state, int action, double reward)
 {
-	history_.push_back(std::make_pair(boost::tuples::make_tuple(state, action), reward));
+	history_.push_back(std::make_pair(std::make_pair(state, action), reward));
 
 	//calculate returns
 	{
 		double rewards = 0.0;
-		std::list<std::pair<state_action_pair_t, double> >::reverse_iterator it = history_.rbegin();
+		auto it = history_.rbegin();
 		for (; it != history_.rend(); ++it) {
 			rewards += it->second;
 			it->second = rewards;
@@ -42,12 +42,12 @@ void MonteCarloAgent::terminate(const State & state, int action, double reward)
 
 	//average returns
 	{
-		std::set<state_action_pair_t> visited;
-		std::list<std::pair<state_action_pair_t, double> >::iterator it = history_.begin();
+		std::set<std::pair<State, int>> visited;
+		auto it = history_.begin();
 		for (; it != history_.end(); ++it) {
 			if (visited.count(it->first)) continue; //should be first visit!
 
-			boost::tuples::tuple<double, u_int64_t> & tuple = monte_carlo_(it->first);
+			auto & tuple = monte_carlo_[it->first.first][it->first.second];
 
 			double & q = tuple.get<0>();
 			u_int64_t & n = tuple.get<1>();

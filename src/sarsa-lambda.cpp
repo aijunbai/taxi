@@ -21,14 +21,14 @@ void SarsaLambdaAgent::backup(const State & state, int action, double reward, do
 {
 	const double delta = reward + gamma * post_value - qvalue(state, action);
 
-	eligibility_[boost::tuples::make_tuple(state, action)] = 1.0;
+	eligibility_[std::make_pair(state, action)] = 1.0;
 
-	for (std::map<state_action_pair_t, double>::iterator it = eligibility_.begin(); it != eligibility_.end(); ++it) {
+	for (auto it = eligibility_.begin(); it != eligibility_.end(); ++it) {
 		double & eligibility = it->second;
 
 		if (eligibility > 0.0) {
-			const State & state = it->first.get<0>();
-			int action = it->first.get<1>();
+			const State & state = it->first.first;
+			int action = it->first.second;
 
 			qvalue(state, action) += alpha * delta * eligibility;
 			eligibility *= gamma * lambda;

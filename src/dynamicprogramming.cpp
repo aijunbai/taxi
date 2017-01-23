@@ -19,7 +19,6 @@ DPAgent::DPAgent(const bool test): OLAgent(test)
 
 DPAgent::~DPAgent()
 {
-	qtable_.save("dp");
 }
 
 Action DPAgent::plan(const State & state)
@@ -29,8 +28,6 @@ Action DPAgent::plan(const State & state)
 
 void DPAgent::ValueIteration()
 {
-	if (qtable_.load("dp")) return;
-
 	int episodes = 0;
 
 	do {
@@ -42,10 +39,12 @@ void DPAgent::ValueIteration()
 					for (int destination = 0; destination < 4; ++destination) {
 						if (destination == passenger) continue;
 
-						double error = UpdateValue(State(x, y, passenger, destination));
+						for (int fuel = 0; fuel <= State::MAX_FUEL; ++fuel) {
+							double error = UpdateValue(State(x, y, passenger, destination, fuel));
 
-						if (error > max_error) {
-							max_error = error;
+							if (error > max_error) {
+								max_error = error;
+							}
 						}
 					}
 				}

@@ -164,8 +164,8 @@ set loadpath
 set fontpath 
 set psdir
 set fit brief errorvariables nocovariancevariables errorscaling prescale nowrap v5
+set grid
 GNUTERM = "wxt"
 x = 0.0
-set log x
-plot 'H.out' t 'hierarchicalfsm' w l, 'HS.out' t 'hierarchicalfsm-det' w l
-#    EOF
+# set log x
+plot \

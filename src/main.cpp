@@ -186,11 +186,9 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  TaxiEnv::model = new TaxiEnv::EnvModel();
-
-  if (profile) { //profile on all states with 100 trials for each state
+  if (profile) {
     double avg_reward = 0.0, avg_time = 0.0;
-    int trials = 1000;
+    int trials = 10000;
 
     vector<double> rewards, time;
 
@@ -254,8 +252,8 @@ int main(int argc, char **argv) {
     int num_threads = 1;
     if (multithreaded) num_threads = thread::hardware_concurrency();
 
-    const int trials = 1000;
-    const int episodes = 5000;
+    const int trials = 4;
+    const int episodes = 100000;
 
     vector<double> rewards(episodes, 0.0), time;
     double avg_time = 0.0;
@@ -282,10 +280,23 @@ int main(int argc, char **argv) {
       t[i].join();
     }
 
-    for (int i = 0; i < episodes; ++i) {
+    double avg = 0.0;
+    queue<double> Q;
+    const int N = 1000;
+    for (int i = 0; i < N; ++i) {
       rewards[i] /= trials;
-      if (i % 100 == 0) {
-        cout << rewards[i] << endl;
+      avg = (avg * Q.size() + rewards[i]) / (Q.size() + 1);
+      Q.push(rewards[i]);
+    }
+
+    for (int i = N; i < episodes; ++i) {
+      rewards[i] /= trials;
+      avg = (avg * Q.size() - Q.front() + rewards[i]) / Q.size();
+      Q.pop();
+      Q.push(rewards[i]);
+
+      if (i % (episodes / 100) == 0) {
+        cout << i << " " << avg << endl;
       }
     }
 
