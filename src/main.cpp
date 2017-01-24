@@ -69,7 +69,7 @@ void call_from_thread(int tid,
       gettimeofday(&start, NULL);
 
       for (int j = 0; j < episodes; ++j) {
-        if (j % 1000 == 0) {
+        if (j % 10000 == 0) {
           cerr << "#episodes #" << j << endl;
         }
 

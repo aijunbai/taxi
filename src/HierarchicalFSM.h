@@ -47,7 +47,7 @@ public:
 
   virtual ~HierarchicalFSM();
 
-  const State &state() { return agent->env()->get_state(); }
+  const State &state() { return agent->env()->state(); }
 
   string machineState() { return agent->getMachineState(); }
 

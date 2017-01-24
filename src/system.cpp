@@ -22,7 +22,7 @@ double System::simulate(Agent & agent, bool verbose)
 
 	env_.reset();
 
-	State state = env_.get_state();
+	State state = env_.state();
 	Action action = agent.plan(state);
 
 	int step = 0;
@@ -32,13 +32,13 @@ double System::simulate(Agent & agent, bool verbose)
 		step += 1;
 
 		if (verbose) {
-			cout << "Step " << step << " | State: " << env_.get_state() << " | Action: " << action_name(Action(action));
+			cout << "Step " << step << " | State: " << env_.state() << " | Action: " << action_name(Action(action));
 		}
 
 		double reward = env_.step(action); //taking action
 		rewards += reward;
 
-		if (env_.terminated() || step >= max_steps) {
+		if (env_.state().terminated() || step >= max_steps) {
 			if (!agent.test()) {
 				agent.terminate(state, action, reward);
 			}
@@ -46,18 +46,19 @@ double System::simulate(Agent & agent, bool verbose)
 			if (verbose) {
 				cout << " | Reward: " << reward;
 
-				if (env_.unloaded()) {
+				if (env_.state().unloaded()) {
 					cout << " | Success" << endl;
 				}
 				else {
 					cout << " | Failure" << endl;
 				}
 			}
+
 			step += 1;
-			break;
+      break;
 		}
 
-		State post_state = env_.get_state(); //observing s'
+		State post_state = env_.state(); //observing s'
 		Action post_action = agent.plan(post_state); //choosing a'
 
 		if (!agent.test()) {
@@ -73,7 +74,7 @@ double System::simulate(Agent & agent, bool verbose)
 	} while(1);
 
 	if (verbose) {
-		cout << "Step " << step << " | State: " << env_.get_state() << std::endl;
+		cout << "Step " << step << " | State: " << env_.state() << std::endl;
 	}
 
 	return rewards;

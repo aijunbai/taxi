@@ -16,5 +16,4 @@ clean:
 	rm -fr Debug
 	rm -f maxq_op
 	rm -fr *.tbl *.log *.dot
-	rm -fr data/
 

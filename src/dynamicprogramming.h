@@ -29,7 +29,7 @@ private:
 	double UpdateValue(const State & state);
 	double UpdateQValue(const State & state, Action action);
 
-	pair<double, Action> Greedy(const State & state);
+	pair<double, Action> Value(const State &state);
 	HashMap<State, HashMap<int, double>> qtable_;
 };
 

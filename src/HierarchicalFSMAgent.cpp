@@ -55,7 +55,7 @@ HierarchicalFSMAgent::~HierarchicalFSMAgent() {
 }
 
 void HierarchicalFSMAgent::step(Action a) {
-  auto state = env_->get_state();
+  auto state = env_->state();
   auto machineState = getMachineState();
 
   if (verbose) {
@@ -87,11 +87,11 @@ void HierarchicalFSMAgent::showHistory()
 }
 
 bool HierarchicalFSMAgent::running() {
-  bool ret = !env()->terminated() && steps < max_steps;
+  bool ret = !env()->state().terminated() && steps < max_steps;
 
   if (!ret) {
     if (verbose) {
-      if (env()->unloaded()) {
+      if (env()->state().unloaded()) {
         cout << " | Success" << endl;
       }
       else {
@@ -175,8 +175,9 @@ int HierarchicalFSMAgent::argmaxQ(const State &state, const string &machineState
   return bestAction;
 }
 
-double & HierarchicalFSMAgent::V(const State &state, const string &machineState, int numChoices)
+double HierarchicalFSMAgent::V(const State &state, const string &machineState, int numChoices)
 {
+  if (state.terminated()) return 0.0;
   return Q(state, machineState, argmaxQ(state, machineState, numChoices));
 }
 

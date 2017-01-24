@@ -6,6 +6,7 @@
  */
 
 #include "state.h"
+#include "taxi.h"
 
 State::State(int a, int b, int c, int d, int e):
     tuple<int, int, int, int, int>(a, b, c, d, e)
@@ -107,4 +108,22 @@ ostream &operator<<(ostream &os, const State &o) {
   }
 
   return os;
+}
+
+bool State::unloaded() const {
+  return passenger() == destination();
+}
+
+bool State::loaded() const {
+  return passenger() == TaxiEnv::Model::ins().inTaxi();
+}
+
+bool State::refueled() const {
+  return taxiPosition() == TaxiEnv::Model::ins().fuelPosition() && fuel() == State::MAX_FUEL;
+}
+
+Position State::taxiPosition() const { return Position(x(), y()); }
+
+Position Position::normalize() {
+  return Position(minmax(0, x, TaxiEnv::SIZE - 1), minmax(0, y, TaxiEnv::SIZE - 1));
 }

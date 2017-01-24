@@ -119,8 +119,8 @@ bool MaxQOPAgent::IsActiveState(Task task, const State & state)
 	switch (task) {
 	case Root_T: return true;
 
-	case Get_T: return state.passenger() != int(TaxiEnv::EnvModel::ins().terminals().size());
-	case Put_T: return state.passenger() == int(TaxiEnv::EnvModel::ins().terminals().size());
+	case Get_T: return state.passenger() != int(TaxiEnv::Model::ins().terminals().size());
+	case Put_T: return state.passenger() == int(TaxiEnv::Model::ins().terminals().size());
 
 	case NavR_T:
 	case NavY_T:
@@ -143,13 +143,13 @@ bool MaxQOPAgent::IsTerminalState(Task task, const State & state)
 	switch (task) {
 	case Root_T: return state.passenger() == state.destination();
 
-	case Get_T: return state.passenger() == int(TaxiEnv::EnvModel::ins().terminals().size());
+	case Get_T: return state.passenger() == int(TaxiEnv::Model::ins().terminals().size());
 	case Put_T: return state.passenger() == state.destination();
 
-	case NavR_T: return TaxiEnv::Position(state.x(), state.y()) == TaxiEnv::EnvModel::ins().terminals()[1];
-	case NavY_T: return TaxiEnv::Position(state.x(), state.y()) == TaxiEnv::EnvModel::ins().terminals()[0];
-	case NavG_T: return TaxiEnv::Position(state.x(), state.y()) == TaxiEnv::EnvModel::ins().terminals()[3];
-	case NavB_T: return TaxiEnv::Position(state.x(), state.y()) == TaxiEnv::EnvModel::ins().terminals()[2];
+	case NavR_T: return Position(state.x(), state.y()) == TaxiEnv::Model::ins().terminals()[1];
+	case NavY_T: return Position(state.x(), state.y()) == TaxiEnv::Model::ins().terminals()[0];
+	case NavG_T: return Position(state.x(), state.y()) == TaxiEnv::Model::ins().terminals()[3];
+	case NavB_T: return Position(state.x(), state.y()) == TaxiEnv::Model::ins().terminals()[2];
 
 	case Pickup_T:
 	case Putdown_T:
@@ -166,21 +166,21 @@ double MaxQOPAgent::TerminalEvaluation(Task task, const State & state)
 {
 	switch (task) {
 	case Root_T:
-		if (state.passenger() == int(TaxiEnv::EnvModel::ins().terminals().size())) { //passenger on taxi
-			return -TaxiEnv::EnvModel::distance(TaxiEnv::Position(state.x(), state.y()), TaxiEnv::EnvModel::ins().terminals()[state.destination()]) - 1 + 20; //taxi -> destination
+		if (state.passenger() == int(TaxiEnv::Model::ins().terminals().size())) { //passenger on taxi
+			return -TaxiEnv::Model::distance(Position(state.x(), state.y()), TaxiEnv::Model::ins().terminals()[state.destination()]) - 1 + 20; //taxi -> destination
 		}
 		else {
-			return -TaxiEnv::EnvModel::distance(TaxiEnv::Position(state.x(), state.y()), TaxiEnv::EnvModel::ins().terminals()[state.passenger()]) - 1
-			- TaxiEnv::EnvModel::distance(TaxiEnv::EnvModel::ins().terminals()[state.passenger()], TaxiEnv::EnvModel::ins().terminals()[state.destination()]) - 1 + 20; //taxi -> passenger -> destination
+			return -TaxiEnv::Model::distance(Position(state.x(), state.y()), TaxiEnv::Model::ins().terminals()[state.passenger()]) - 1
+			- TaxiEnv::Model::distance(TaxiEnv::Model::ins().terminals()[state.passenger()], TaxiEnv::Model::ins().terminals()[state.destination()]) - 1 + 20; //taxi -> passenger -> destination
 		}
 
-	case Get_T: return -TaxiEnv::EnvModel::distance(TaxiEnv::Position(state.x(), state.y()), TaxiEnv::EnvModel::ins().terminals()[state.passenger()]) - 1; //taxi -> passenger
-	case Put_T: return -TaxiEnv::EnvModel::distance(TaxiEnv::Position(state.x(), state.y()), TaxiEnv::EnvModel::ins().terminals()[state.destination()]) - 1 + 20; //taxi -> destination
+	case Get_T: return -TaxiEnv::Model::distance(Position(state.x(), state.y()), TaxiEnv::Model::ins().terminals()[state.passenger()]) - 1; //taxi -> passenger
+	case Put_T: return -TaxiEnv::Model::distance(Position(state.x(), state.y()), TaxiEnv::Model::ins().terminals()[state.destination()]) - 1 + 20; //taxi -> destination
 
-	case NavR_T: return -TaxiEnv::EnvModel::distance(TaxiEnv::Position(state.x(), state.y()), TaxiEnv::EnvModel::ins().terminals()[1]);
-	case NavY_T: return -TaxiEnv::EnvModel::distance(TaxiEnv::Position(state.x(), state.y()), TaxiEnv::EnvModel::ins().terminals()[0]);
-	case NavG_T: return -TaxiEnv::EnvModel::distance(TaxiEnv::Position(state.x(), state.y()), TaxiEnv::EnvModel::ins().terminals()[3]);
-	case NavB_T: return -TaxiEnv::EnvModel::distance(TaxiEnv::Position(state.x(), state.y()), TaxiEnv::EnvModel::ins().terminals()[2]);
+	case NavR_T: return -TaxiEnv::Model::distance(Position(state.x(), state.y()), TaxiEnv::Model::ins().terminals()[1]);
+	case NavY_T: return -TaxiEnv::Model::distance(Position(state.x(), state.y()), TaxiEnv::Model::ins().terminals()[0]);
+	case NavG_T: return -TaxiEnv::Model::distance(Position(state.x(), state.y()), TaxiEnv::Model::ins().terminals()[3]);
+	case NavB_T: return -TaxiEnv::Model::distance(Position(state.x(), state.y()), TaxiEnv::Model::ins().terminals()[2]);
 
 	case Pickup_T:
 	case Putdown_T:
@@ -202,16 +202,16 @@ MaxQOPAgent::ValuePrimitiveActionPair MaxQOPAgent::ImmediateReward(const State &
 {
 	switch (task) {
 	case Pickup_T:
-		if (state.passenger() == int(TaxiEnv::EnvModel::ins().terminals().size()) || TaxiEnv::Position(state.x(), state.y()) !=
-																																				TaxiEnv::EnvModel::ins().terminals()[state.passenger()]) {
+		if (state.passenger() == int(TaxiEnv::Model::ins().terminals().size()) || Position(state.x(), state.y()) !=
+																																				TaxiEnv::Model::ins().terminals()[state.passenger()]) {
 			return ValuePrimitiveActionPair(-10, Pickup);
 		}
 		else {
 			return ValuePrimitiveActionPair(-1, Pickup);
 		}
 	case Putdown_T:
-		if (state.passenger() == int(TaxiEnv::EnvModel::ins().terminals().size()) && TaxiEnv::Position(state.x(), state.y()) ==
-																																				TaxiEnv::EnvModel::ins().terminals()[state.destination()]) {
+		if (state.passenger() == int(TaxiEnv::Model::ins().terminals().size()) && Position(state.x(), state.y()) ==
+																																				TaxiEnv::Model::ins().terminals()[state.destination()]) {
 			return ValuePrimitiveActionPair(+20, Putdown);
 		}
 		else {

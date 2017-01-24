@@ -19,93 +19,20 @@
 #include <vector>
 #include <string>
 
-enum Action {
-  North = 0,
-  South,
-  East,
-  West,
-  Pickup,
-  Putdown,
-  Fillup,
-
-  ActionSize,
-  Null
-};
-
-inline std::ostream& operator<<(std::ostream& out, const Action value) {
-  static unordered_map<int, string> strings;
-
-  if (strings.size() == 0) {
-#define INSERT_ELEMENT(p) strings[p] = #p
-    INSERT_ELEMENT(North);
-    INSERT_ELEMENT(South);
-    INSERT_ELEMENT(East);
-    INSERT_ELEMENT(West);
-    INSERT_ELEMENT(Pickup);
-    INSERT_ELEMENT(Putdown);
-    INSERT_ELEMENT(Fillup);
-    INSERT_ELEMENT(ActionSize);
-    INSERT_ELEMENT(Null);
-#undef INSERT_ELEMENT
-  }
-
-  return out << strings[value];
-}
-
-
-inline std::string action_name(Action action)
-{
-  switch (action) {
-    case North: return "North";
-    case South: return "South";
-    case East: return "East";
-    case West: return "West";
-    case Pickup: return "Pickup";
-    case Putdown: return "Putdown";
-    case Fillup: return "Fillup";
-    default: return "Null-" + to_string(action);
-  }
-}
-
 class TaxiEnv {
 public:
   static int SIZE;
 
 public:
-  struct Position {
-    int x;
-    int y;
-
-    Position(int a = 0, int b = 0): x(a), y(b) {
-
-    }
-
-    Position normalize() {
-      return Position(minmax(0, x, SIZE - 1), minmax(0, y, SIZE - 1));
-    }
-
-    bool operator==(const Position & o) const {
-      return x == o.x && y == o.y;
-    }
-
-    bool operator!=(const Position & o) const {
-      return x != o.x || y != o.y;
-    }
-
-    Position operator+(const Position & o) {
-      return Position(x + o.x, y + o.y);
-    }
-  };
-
-  class EnvModel {
+  class Model {
   public:
-    static const EnvModel &ins() {
-      static EnvModel m;
+    static const Model &ins() {
+      static Model m;
       return m;
     }
 
   private:
-    EnvModel() {
+    Model() {
       terminals_.push_back(Position(0, 0));
       terminals_.push_back(Position(0, SIZE - 1));
       terminals_.push_back(Position(SIZE - 2, 0));
@@ -165,12 +92,12 @@ public:
     int inTaxi_;
 
   public:
-    int getInTaxi_() const {
+    int inTaxi() const {
       return inTaxi_;
     }
 
   public:
-    const Position &getFuelPosition_() const {
+    const Position &fuelPosition() const {
       return fuelPosition_;
     }
 
@@ -189,30 +116,13 @@ public:
 
   double step(Action action);
 
-  const State &get_state() {
+  const State &state() {
     return state_;
-  }
-
-  bool unloaded() {
-    return state_.passenger() == state_.destination();
-  }
-
-  bool loaded() {
-    return state_.passenger() == EnvModel::ins().getInTaxi_();
-  }
-
-  bool refueled() {
-    return taxi() == EnvModel::ins().getFuelPosition_() && state_.fuel() == State::MAX_FUEL;
-  }
-
-  bool terminated() {
-    return state_.terminated();
   }
 
   Position destination() { return terminal(state_.destination()); };
   Position passenger() { return terminal(state_.passenger()); };
-  Position terminal(int i) { return EnvModel::ins().terminals().operator[](i); };
-  Position taxi() { return Position(state_.x(), state_.y()); }
+  Position terminal(int i) { return Model::ins().terminals().operator[](i); };
 
 private:
   Position get_random_position() {
@@ -220,7 +130,7 @@ private:
   }
 
   int get_random_stop() {
-    return rand() % EnvModel::ins().terminals().size();
+    return rand() % Model::ins().terminals().size();
   }
 
   int get_random_fuel() {

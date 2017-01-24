@@ -23,7 +23,7 @@ DPAgent::~DPAgent()
 
 Action DPAgent::plan(const State & state)
 {
-	return Greedy(state).second;
+	return Value(state).second;
 }
 
 void DPAgent::ValueIteration()
@@ -63,15 +63,19 @@ double DPAgent::UpdateValue(const State & state)
 {
 	double error = 0.0;
 
-	for (int i = 0; i < ActionSize; ++i) {
-		error += UpdateQValue(state, Action(i));
-	}
+  if (!state.terminated()) {
+    for (int i = 0; i < ActionSize; ++i) {
+      error += UpdateQValue(state, Action(i));
+    }
+  }
 
 	return error;
 }
 
-pair<double, Action> DPAgent::Greedy(const State & state)
+pair<double, Action> DPAgent::Value(const State &state)
 {
+	if (state.terminated()) return {0.0, Null};
+
 	double max = -1.0e6;
 	Action best = Null;
 
@@ -89,18 +93,15 @@ pair<double, Action> DPAgent::Greedy(const State & state)
 
 double DPAgent::UpdateQValue(const State & state, Action action)
 {
-	static const double gamma = 1.0 - 1.0e-3;
-
+	static const double gamma = 1.0;
 	double tmp = TaxiEnv::Reward(state, action);
-
 	vector<pair<State, double> > samples = TaxiEnv::Transition(state, action);
 
 	for (int i = 0; i < int(samples.size()); ++i) {
-		tmp += gamma * samples[i].second * Greedy(samples[i].first).first;
+		tmp += gamma * samples[i].second * Value(samples[i].first).first;
 	}
 
 	double error = abs(qtable_[state][action] - tmp);
-
 	qtable_[state][action] = tmp;
 
 	return error;

@@ -40,7 +40,7 @@ Action AStarAgent::plan(const State & state)
 
 std::pair<State, double> AStarAgent::apply(State state, const Action action)
 {
-	TaxiEnv::Position taxi(state.x(), state.y());
+	Position taxi(state.x(), state.y());
 	double cost = 0.0;
 
 	switch (action) {
@@ -48,14 +48,14 @@ std::pair<State, double> AStarAgent::apply(State state, const Action action)
 	case South:
 	case East:
 	case West:
-		taxi = taxi + TaxiEnv::EnvModel::ins().delta_[taxi.x][taxi.y][action];
+		taxi = taxi + TaxiEnv::Model::ins().delta_[taxi.x][taxi.y][action];
 		state.x() = taxi.x;
 		state.y() = taxi.y;
 		cost = 1.0;
 		break;
 	case Pickup:
-		if (state.passenger() != int(TaxiEnv::EnvModel::ins().terminals().size()) && taxi == TaxiEnv::EnvModel::ins().terminals()[state.passenger()]) {
-			state.passenger() = int(TaxiEnv::EnvModel::ins().terminals().size());
+		if (state.passenger() != int(TaxiEnv::Model::ins().terminals().size()) && taxi == TaxiEnv::Model::ins().terminals()[state.passenger()]) {
+			state.passenger() = int(TaxiEnv::Model::ins().terminals().size());
 			cost = 1.0;
 		}
 		else {
@@ -63,7 +63,7 @@ std::pair<State, double> AStarAgent::apply(State state, const Action action)
 		}
 		break;
 	case Putdown:
-		if (state.passenger() == int(TaxiEnv::EnvModel::ins().terminals().size()) && taxi == TaxiEnv::EnvModel::ins().terminals()[state.destination()]) {
+		if (state.passenger() == int(TaxiEnv::Model::ins().terminals().size()) && taxi == TaxiEnv::Model::ins().terminals()[state.destination()]) {
 			state.passenger() = state.destination();
 			cost = /*20.0*/0.0;
 		}

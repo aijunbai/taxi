@@ -167,9 +167,9 @@ Navigate::~Navigate() {
 
 void Navigate::run(const vector<string> & parameters) {
   char c = parameters[0][0];
-  TaxiEnv::Position target = c == 'F'? TaxiEnv::EnvModel::ins().getFuelPosition_() : agent->env()->terminal(c - '0');
+  Position target = c == 'F'? TaxiEnv::Model::ins().fuelPosition() : agent->env()->terminal(c - '0');
 
-  while (running() && agent->env()->taxi() != target) {
+  while (running() && agent->env()->state().taxiPosition() != target) {
     MakeChoice<HierarchicalFSM *> c(this, dir_choice);
     auto m = c();
 

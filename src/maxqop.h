@@ -21,252 +21,252 @@ using namespace std;
 
 class MaxQOPAgent: public OLAgent {
 public:
-	MaxQOPAgent(const bool test);
-	virtual ~MaxQOPAgent();
+  MaxQOPAgent(const bool test);
+  virtual ~MaxQOPAgent();
 
-	Action plan(const State & state);
-
-private:
-	enum Task { //defined subtask for MAXQ hierarchical structure
-		Root_T = 0,
-
-				Get_T,
-				Put_T,
-
-				NavR_T,
-				NavY_T,
-				NavB_T,
-				NavG_T,
-
-				Pickup_T,
-				Putdown_T,
-				North_T,
-				South_T,
-				East_T,
-				West_T,
-
-				TaskSize
-	};
-
-	static std::string task_name(Task task)
-	{
-		switch (task) {
-		case Root_T: return "Root";
-
-		case Get_T: return "Get";
-		case Put_T: return "Put";
-
-		case NavR_T: return "NavR";
-		case NavY_T: return "NavY";
-		case NavG_T: return "NavG";
-		case NavB_T: return "NavB";
-
-		case Pickup_T: return "Pickup";
-		case Putdown_T: return "Putdown";
-		case North_T: return "North";
-		case South_T: return "South";
-		case East_T: return "East";
-		case West_T:  return "West";
-
-		default: assert(0);  return "Nil";
-		}
-	}
-
-	struct ValuePrimitiveActionPair {
-		double value;
-		Action primitive_action;
-
-		explicit ValuePrimitiveActionPair(double v = -infty, Action a = Null): value(v), primitive_action(a) { }
-	};
-
-	static const int infty = 1e6;
-
-	ValuePrimitiveActionPair EvaluateState(Task task, const State & state, vector<int>& depths);
-
-	double EvaluateCompletion(Task task, const State & state, Task action, vector<int>& depths);
-
-	bool IsActiveState(Task task, const State & state);
-	bool IsTerminalState(Task task, const State & state);
-
-	bool IsPrimitive(Task task);
-
-	ValuePrimitiveActionPair ImmediateReward(const State & state, Task task);
-
-	double TerminalEvaluation(Task task, const State & state);
-
-	vector<pair<State, double> > TerminateStates(Task task, const State & state, Task action);
+  Action plan(const State & state);
 
 private:
-	struct TransitionFunc {
-		virtual vector<pair<State, double> > operator()(const State& state) = 0;
+  enum Task { //defined subtask for MAXQ hierarchical structure
+    Root_T = 0,
 
-		TransitionFunc(Task action): action_(action) { }
-		Task action_;
-	};
+    Get_T,
+    Put_T,
 
-	struct RootTransition: public TransitionFunc {
-		RootTransition(Task action): TransitionFunc(action) { }
+    NavR_T,
+    NavY_T,
+    NavB_T,
+    NavG_T,
 
-		vector<pair<State, double> > operator()(const State& state) {
-			vector<pair<State, double> > samples;
+    Pickup_T,
+    Putdown_T,
+    North_T,
+    South_T,
+    East_T,
+    West_T,
 
-			State tmp(state);
+    TaskSize
+  };
 
-			if (action_ == Get_T) {
-				tmp.x() = TaxiEnv::EnvModel::ins().terminals()[state.passenger()].x;
-				tmp.y() = TaxiEnv::EnvModel::ins().terminals()[state.passenger()].y;
-				tmp.passenger() = TaxiEnv::EnvModel::ins().terminals().size();
-			}
-			else if (action_ == Put_T) {
-				tmp.x() = TaxiEnv::EnvModel::ins().terminals()[state.destination()].x;
-				tmp.y() = TaxiEnv::EnvModel::ins().terminals()[state.destination()].y;
-				tmp.passenger() = state.destination();
-			}
-			else {
-				assert(0);
-			}
+  static std::string task_name(Task task)
+  {
+    switch (task) {
+      case Root_T: return "Root";
 
-			samples.push_back(make_pair(tmp, 1.0));
+      case Get_T: return "Get";
+      case Put_T: return "Put";
 
-			return samples;
-		}
-	};
+      case NavR_T: return "NavR";
+      case NavY_T: return "NavY";
+      case NavG_T: return "NavG";
+      case NavB_T: return "NavB";
 
-	struct GetPutTransition: public TransitionFunc {
-		GetPutTransition(Task task, Task action): TransitionFunc(action), task_(task) {
+      case Pickup_T: return "Pickup";
+      case Putdown_T: return "Putdown";
+      case North_T: return "North";
+      case South_T: return "South";
+      case East_T: return "East";
+      case West_T:  return "West";
 
-		}
+      default: assert(0);  return "Nil";
+    }
+  }
 
-		vector<pair<State, double> > operator()(const State& state) {
-			vector<pair<State, double> > samples;
+  struct ValuePrimitiveActionPair {
+    double value;
+    Action primitive_action;
 
-			State tmp(state);
+    explicit ValuePrimitiveActionPair(double v = -infty, Action a = Null): value(v), primitive_action(a) { }
+  };
 
-			switch (action_) {
-			case Pickup_T:
-				if (task_ == Get_T) {
-					if (TaxiEnv::Position(state.x(), state.y()) == TaxiEnv::EnvModel::ins().terminals()[state.passenger()]) {
-						tmp.passenger() = TaxiEnv::EnvModel::ins().terminals().size();
-					}
-				}
-				else {
-					assert(0);
-				}
-				break;
+  static const int infty = 1e6;
 
-			case Putdown_T:
-				if (task_ == Put_T) {
-					if (state.passenger() == int(TaxiEnv::EnvModel::ins().terminals().size()) && TaxiEnv::Position(state.x(), state.y()) ==
-                                                                              TaxiEnv::EnvModel::ins().terminals()[state.destination()]) {
-						tmp.passenger() = state.destination();
-					}
-				}
-				else {
-					assert(0);
-				}
-				break;
+  ValuePrimitiveActionPair EvaluateState(Task task, const State & state, vector<int>& depths);
 
-			case NavB_T:
-				tmp.x() = TaxiEnv::EnvModel::ins().terminals()[2].x;
-				tmp.y() = TaxiEnv::EnvModel::ins().terminals()[2].y;
-				break;
+  double EvaluateCompletion(Task task, const State & state, Task action, vector<int>& depths);
 
-			case NavY_T:
-				tmp.x() = TaxiEnv::EnvModel::ins().terminals()[0].x;
-				tmp.y() = TaxiEnv::EnvModel::ins().terminals()[0].y;
-				break;
+  bool IsActiveState(Task task, const State & state);
+  bool IsTerminalState(Task task, const State & state);
 
-			case NavR_T:
-				tmp.x() = TaxiEnv::EnvModel::ins().terminals()[1].x;
-				tmp.y() = TaxiEnv::EnvModel::ins().terminals()[1].y;
-				break;
+  bool IsPrimitive(Task task);
 
-			case NavG_T:
-				tmp.x() = TaxiEnv::EnvModel::ins().terminals()[3].x;
-				tmp.y() = TaxiEnv::EnvModel::ins().terminals()[3].y;
-				break;
+  ValuePrimitiveActionPair ImmediateReward(const State & state, Task task);
 
-			default: assert(0); break;
-			}
+  double TerminalEvaluation(Task task, const State & state);
 
-			samples.push_back(make_pair(tmp, 1.0));
-			return samples;
-		}
+  vector<pair<State, double> > TerminateStates(Task task, const State & state, Task action);
 
-		Task task_;
-	};
+private:
+  struct TransitionFunc {
+    virtual vector<pair<State, double> > operator()(const State& state) = 0;
 
-	static Action translate_primitive(Task action) {
-		switch (action) {
-		case North_T: return North;
-		case South_T: return South;
-		case East_T: return East;
-		case West_T: return West;
-		default: assert(0); break;
-		}
+    TransitionFunc(Task action): action_(action) { }
+    Task action_;
+  };
 
-		assert(0);
-		return Null;
-	}
+  struct RootTransition: public TransitionFunc {
+    RootTransition(Task action): TransitionFunc(action) { }
 
-	static Action sample_primitive(Task action) {
-		double prob = get_prob();
+    vector<pair<State, double> > operator()(const State& state) {
+      vector<pair<State, double> > samples;
 
-		if (prob <= 0.1) {
-			switch (action) {
-			case North_T: return West;
-			case South_T: return East;
-			case East_T: return North;
-			case West_T: return South;
-			default: assert(0); break;
-			}
-		}
-		else if (prob <= 0.2) {
-			switch (action) {
-			case North_T: return East;
-			case South_T: return West;
-			case East_T: return South;
-			case West_T: return North;
-			default: assert(0); break;
-			}
-		}
+      State tmp(state);
 
-		return translate_primitive(action);
-	}
+      if (action_ == Get_T) {
+        tmp.x() = TaxiEnv::Model::ins().terminals()[state.passenger()].x;
+        tmp.y() = TaxiEnv::Model::ins().terminals()[state.passenger()].y;
+        tmp.passenger() = TaxiEnv::Model::ins().terminals().size();
+      }
+      else if (action_ == Put_T) {
+        tmp.x() = TaxiEnv::Model::ins().terminals()[state.destination()].x;
+        tmp.y() = TaxiEnv::Model::ins().terminals()[state.destination()].y;
+        tmp.passenger() = state.destination();
+      }
+      else {
+        assert(0);
+      }
 
-	struct NavTransition: public TransitionFunc {
-		NavTransition(Task action): TransitionFunc(action){ }
+      samples.push_back(make_pair(tmp, 1.0));
 
-		vector<pair<State, double> > operator()(const State& state) {
-			vector<pair<State, double> > samples;
+      return samples;
+    }
+  };
+
+  struct GetPutTransition: public TransitionFunc {
+    GetPutTransition(Task task, Task action): TransitionFunc(action), task_(task) {
+
+    }
+
+    vector<pair<State, double> > operator()(const State& state) {
+      vector<pair<State, double> > samples;
+
+      State tmp(state);
+
+      switch (action_) {
+        case Pickup_T:
+          if (task_ == Get_T) {
+            if (Position(state.x(), state.y()) == TaxiEnv::Model::ins().terminals()[state.passenger()]) {
+              tmp.passenger() = TaxiEnv::Model::ins().terminals().size();
+            }
+          }
+          else {
+            assert(0);
+          }
+          break;
+
+        case Putdown_T:
+          if (task_ == Put_T) {
+            if (state.passenger() == int(TaxiEnv::Model::ins().terminals().size())
+                && state.taxiPosition() == TaxiEnv::Model::ins().terminals()[state.destination()]) {
+              tmp.passenger() = state.destination();
+            }
+          }
+          else {
+            assert(0);
+          }
+          break;
+
+        case NavB_T:
+          tmp.x() = TaxiEnv::Model::ins().terminals()[2].x;
+          tmp.y() = TaxiEnv::Model::ins().terminals()[2].y;
+          break;
+
+        case NavY_T:
+          tmp.x() = TaxiEnv::Model::ins().terminals()[0].x;
+          tmp.y() = TaxiEnv::Model::ins().terminals()[0].y;
+          break;
+
+        case NavR_T:
+          tmp.x() = TaxiEnv::Model::ins().terminals()[1].x;
+          tmp.y() = TaxiEnv::Model::ins().terminals()[1].y;
+          break;
+
+        case NavG_T:
+          tmp.x() = TaxiEnv::Model::ins().terminals()[3].x;
+          tmp.y() = TaxiEnv::Model::ins().terminals()[3].y;
+          break;
+
+        default: assert(0); break;
+      }
+
+      samples.push_back(make_pair(tmp, 1.0));
+      return samples;
+    }
+
+    Task task_;
+  };
+
+  static Action translate_primitive(Task action) {
+    switch (action) {
+      case North_T: return North;
+      case South_T: return South;
+      case East_T: return East;
+      case West_T: return West;
+      default: assert(0); break;
+    }
+
+    assert(0);
+    return Null;
+  }
+
+  static Action sample_primitive(Task action) {
+    double prob = get_prob();
+
+    if (prob <= 0.1) {
+      switch (action) {
+        case North_T: return West;
+        case South_T: return East;
+        case East_T: return North;
+        case West_T: return South;
+        default: assert(0); break;
+      }
+    }
+    else if (prob <= 0.2) {
+      switch (action) {
+        case North_T: return East;
+        case South_T: return West;
+        case East_T: return South;
+        case West_T: return North;
+        default: assert(0); break;
+      }
+    }
+
+    return translate_primitive(action);
+  }
+
+  struct NavTransition: public TransitionFunc {
+    NavTransition(Task action): TransitionFunc(action){ }
+
+    vector<pair<State, double> > operator()(const State& state) {
+      vector<pair<State, double> > samples;
 
 #if 1
-			vector<Action> actions(3, translate_primitive(action_));
-			vector<double> distribution(3, 0.1);
-			vector<TaxiEnv::Position> locations(3, TaxiEnv::Position(state.x(), state.y()));
+      vector<Action> actions(3, translate_primitive(action_));
+      vector<double> distribution(3, 0.1);
+      vector<Position> locations(3, Position(state.x(), state.y()));
 
-			distribution[0] = 0.8;
+      distribution[0] = 0.8;
 
-			switch (action_) {
-			case North_T: actions[1] = East; actions[2] = West; break;
-			case South_T: actions[1] = East; actions[2] = West; break;
-			case East_T: actions[1] = South; actions[2] = North; break;
-			case West_T: actions[1] = South; actions[2] = North; break;
-			default: assert(0); break;
-			}
+      switch (action_) {
+        case North_T: actions[1] = East; actions[2] = West; break;
+        case South_T: actions[1] = East; actions[2] = West; break;
+        case East_T: actions[1] = South; actions[2] = North; break;
+        case West_T: actions[1] = South; actions[2] = North; break;
+        default: assert(0); break;
+      }
 
-			State tmp(state);
+      State tmp(state);
 
-			for (int i = 0; i < 3; ++i) {
-				locations[i] = locations[i] + TaxiEnv::EnvModel::ins().delta_[locations[i].x][locations[i].y][actions[i]];
+      for (int i = 0; i < 3; ++i) {
+        locations[i] = locations[i] + TaxiEnv::Model::ins().delta_[locations[i].x][locations[i].y][actions[i]];
 
-				tmp.x() = locations[i].x;
-				tmp.y() = locations[i].y;
+        tmp.x() = locations[i].x;
+        tmp.y() = locations[i].y;
 
-				samples.push_back(make_pair(tmp, distribution[i]));
-			}
+        samples.push_back(make_pair(tmp, distribution[i]));
+      }
 #else
-			Action action = translate_primitive(action_); //maximal likelihood action
+      Action action = translate_primitive(action_); //maximal likelihood action
 			TaxiEnv::Position location(state.x(), state.y());
 
 			location = location + TaxiEnv::EnvModel::ins().delta_[location.x][location.y][action];
@@ -279,51 +279,51 @@ private:
 			samples.push_back(make_pair(tmp, 1.0));
 #endif
 
-			return samples;
-		}
-	};
+      return samples;
+    }
+  };
 
-	State RelevantStateTemplate(Task task, const State& state);
+  State RelevantStateTemplate(Task task, const State& state);
 
-	private:
-	map<Task, map<Task, TransitionFunc*> > maxq_;
-	int max_depth_[TaskSize];
+private:
+  map<Task, map<Task, TransitionFunc*> > maxq_;
+  int max_depth_[TaskSize];
 
-	HashMap<State, std::pair<ValuePrimitiveActionPair, int> > cache_[TaskSize];
+  HashMap<State, std::pair<ValuePrimitiveActionPair, int> > cache_[TaskSize];
 
-	private:
-	void DumpSearchTree();
+private:
+  void DumpSearchTree();
 
-	dot::Graph search_tree_;
+  dot::Graph search_tree_;
 
-	struct Node {
-		static int id;
+  struct Node {
+    static int id;
 
-		std::string str;
-		std::string color;
+    std::string str;
+    std::string color;
 
-		Node(const std::string& info, const vector<int>& depths) {
-			color = "green";
+    Node(const std::string& info, const vector<int>& depths) {
+      color = "green";
 
-			std::stringstream ss;
-			ss << id++;
+      std::stringstream ss;
+      ss << id++;
 
-			str += "#" + ss.str() + ":\\n" + info + "\\n[";
+      str += "#" + ss.str() + ":\\n" + info + "\\n[";
 
-			for (uint i = 0; i < depths.size(); ++i) {
-				std::stringstream ss;
-				ss << depths[i];
-				str += ss.str();
+      for (uint i = 0; i < depths.size(); ++i) {
+        std::stringstream ss;
+        ss << depths[i];
+        str += ss.str();
 
-				if (i != depths.size() - 1) {
-					str += " ";
-				}
-			}
-			str += "]";
-		}
-	};
+        if (i != depths.size() - 1) {
+          str += " ";
+        }
+      }
+      str += "]";
+    }
+  };
 
-	std::stack<Node> nodes_stack_;
+  std::stack<Node> nodes_stack_;
 };
 
 #endif /* MAXQOLAGENT_H_ */

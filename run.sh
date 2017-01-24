@@ -22,7 +22,7 @@ set -o nounset                              # Treat unset variables as an error
 VERSION="release"
 SIZE="5"
 TRIALS="4"
-EPISODES="1000000"
+EPISODES="10000000"
 PLT="plot.gnuplot"
 
 ulimit -c unlimited
@@ -37,12 +37,11 @@ cp ../${PLT} cplot.gnuplot
 
 for alg in hierarchicalfsm hierarchicalfsmdet; do
     time ../maxq_op --size $SIZE --trials $TRIALS --episodes $EPISODES \
-        --train --multithreaded --$alg > ${alg}.out &
+        --train --multithreaded --$alg > ${alg}.out
     echo "'${alg}.out' u 1:2 w l, \\" >> plot.gnuplot
     echo "'${alg}.out' u 1:3 w l, \\" >> cplot.gnuplot
 done
 
-wait
 gnuplot -p plot.gnuplot &
 gnuplot -p cplot.gnuplot &
 

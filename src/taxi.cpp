@@ -46,6 +46,8 @@ std::pair<State, double> TaxiEnv::Sample(const State& state, Action action)
 
 vector<pair<State, double> > TaxiEnv::Transition(const State & state, Action action)
 {
+  assert(!state.terminated());
+
   vector<pair<State, double> > samples;
   auto pos = Position(state.x(), state.y());
 
@@ -55,7 +57,7 @@ vector<pair<State, double> > TaxiEnv::Transition(const State & state, Action act
   else {
     switch (action) {
       case Putdown:
-        if (state.passenger() != EnvModel::ins().getInTaxi_() || pos != EnvModel::ins().terminals()[state.destination()]) {
+        if (state.passenger() != Model::ins().inTaxi() || pos != Model::ins().terminals()[state.destination()]) {
           samples.push_back(make_pair(state, 1.0));
         }
         else {
@@ -65,12 +67,12 @@ vector<pair<State, double> > TaxiEnv::Transition(const State & state, Action act
         }
         break;
       case Pickup:
-        if (state.passenger() == EnvModel::ins().getInTaxi_() || pos != EnvModel::ins().terminals()[state.passenger()]) {
+        if (state.passenger() == Model::ins().inTaxi() || pos != Model::ins().terminals()[state.passenger()]) {
           samples.push_back(make_pair(state, 1.0));
         }
         else {
           State tmp(state);
-          tmp.passenger() = EnvModel::ins().getInTaxi_();
+          tmp.passenger() = Model::ins().inTaxi();
           samples.push_back(make_pair(tmp, 1.0));
         }
         break;
@@ -83,8 +85,8 @@ vector<pair<State, double> > TaxiEnv::Transition(const State & state, Action act
         State tmp(state);
         tmp.fuel() -= 1;
 
-        TaxiEnv::Position location(state.x(), state.y());
-        location = location + TaxiEnv::EnvModel::ins().delta_[location.x][location.y][action];
+        Position location(state.x(), state.y());
+        location = location + TaxiEnv::Model::ins().delta_[location.x][location.y][action];
 
         tmp.x() = location.x;
         tmp.y() = location.y;
@@ -109,7 +111,7 @@ vector<pair<State, double> > TaxiEnv::Transition(const State & state, Action act
         tmp.fuel() -= 1;
 
         for (int i = 0; i < 3; ++i) {
-          Position delta = EnvModel::ins().delta_[locations[i].x][locations[i].y][actions[i]];
+          Position delta = Model::ins().delta_[locations[i].x][locations[i].y][actions[i]];
           locations[i] = locations[i] + delta;
 
           tmp.x() = locations[i].x;
@@ -121,7 +123,7 @@ vector<pair<State, double> > TaxiEnv::Transition(const State & state, Action act
       }
         break;
       case Fillup:
-        if (pos == EnvModel::ins().getFuelPosition_()) {
+        if (pos == Model::ins().fuelPosition()) {
           State tmp(state);
           tmp.fuel() = State::MAX_FUEL;
           samples.push_back(make_pair(tmp, 1.0));
@@ -139,23 +141,22 @@ vector<pair<State, double> > TaxiEnv::Transition(const State & state, Action act
 
 double TaxiEnv::Reward(const State & state, Action action)
 {
-  auto pos = Position(state.x(), state.y());
+  assert(!state.terminated());
 
-  if (state.terminated()) {
-    return state.fuel() <= 0? -20: +20;
-  }
+  if (state.terminated()) return 0.0;
+  auto pos = Position(state.x(), state.y());
 
   switch (action) {
     case Pickup:
-      if (state.passenger() == EnvModel::ins().getInTaxi_() || pos != EnvModel::ins().terminals()[state.passenger()]) {
+      if (state.passenger() == Model::ins().inTaxi() || pos != Model::ins().terminals()[state.passenger()]) {
         return -10;
       }
       else {
         return -1;
       }
     case Putdown:
-      if (state.passenger() == EnvModel::ins().getInTaxi_() && pos == EnvModel::ins().terminals()[state.destination()]) {
-        return +20;
+      if (state.passenger() == Model::ins().inTaxi() && pos == Model::ins().terminals()[state.destination()]) {
+        return 20;
       }
       else {
         return -10;
@@ -164,14 +165,9 @@ double TaxiEnv::Reward(const State & state, Action action)
     case South:
     case East:
     case West:
-      return -1;
+      return state.fuel() <= 1? -20: -1;
     case Fillup:
-      if (pos == EnvModel::ins().getFuelPosition_()) {
-        return -1;
-      }
-      else {
-        return -10;
-      }
+      return -1;
     default: assert(0); return -100000;
   }
 }

@@ -36,12 +36,12 @@ private:
 		Action action_from;
 
 		Node(const State& state, double g, Node *parent, Action action_from): state(state), g(g), h(0.0), parent(parent), action_from(action_from) {
-			if (state.passenger() == int(TaxiEnv::EnvModel::ins().terminals().size())) { //on taxi
-				h = TaxiEnv::EnvModel::distance(TaxiEnv::Position(state.x(), state.y()), TaxiEnv::EnvModel::ins().terminals()[state.destination()]) + 1; //taxi -> destination
+			if (state.passenger() == int(TaxiEnv::Model::ins().terminals().size())) { //on taxi
+				h = TaxiEnv::Model::distance(Position(state.x(), state.y()), TaxiEnv::Model::ins().terminals()[state.destination()]) + 1; //taxi -> destination
 			}
 			else { //not on taxi
-				h = TaxiEnv::EnvModel::distance(TaxiEnv::Position(state.x(), state.y()), TaxiEnv::EnvModel::ins().terminals()[state.passenger()]) + 1
-					+ TaxiEnv::EnvModel::distance(TaxiEnv::EnvModel::ins().terminals()[state.passenger()], TaxiEnv::EnvModel::ins().terminals()[state.destination()]) + 1; //taxi -> passenger -> destination
+				h = TaxiEnv::Model::distance(Position(state.x(), state.y()), TaxiEnv::Model::ins().terminals()[state.passenger()]) + 1
+					+ TaxiEnv::Model::distance(TaxiEnv::Model::ins().terminals()[state.passenger()], TaxiEnv::Model::ins().terminals()[state.destination()]) + 1; //taxi -> passenger -> destination
 			}
 		}
 

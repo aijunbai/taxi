@@ -92,7 +92,7 @@ public:
 
   double & Q(const State &state, const string &machineState, int choice);
 
-  double & V(const State &state, const string &machineState, int numChoices);
+  double V(const State &state, const string &machineState, int numChoices);
 
   int selectChoice(const State &state, const string &machineState, int numChoices);
   int argmaxQ(const State &state, const string &machineState, int numChoices);
