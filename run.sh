@@ -32,13 +32,19 @@ make $VERSION
 mkdir data
 cd data
 
-cp ../${PLT} .
+cp ../${PLT} plot.gnuplot
+cp ../${PLT} cplot.gnuplot
+
 for alg in hierarchicalfsm hierarchicalfsmdet; do
     time ../maxq_op --size $SIZE --trials $TRIALS --episodes $EPISODES \
         --train --multithreaded --$alg > ${alg}.out &
-    echo "'${alg}.out' w l, \\" >> ${PLT}
+    echo "'${alg}.out' u 1:2 w l, \\" >> plot.gnuplot
+    echo "'${alg}.out' u 1:3 w l, \\" >> cplot.gnuplot
 done
 
 wait
-gnuplot -p ${PLT}
+gnuplot -p plot.gnuplot &
+gnuplot -p cplot.gnuplot &
+
+wait
 

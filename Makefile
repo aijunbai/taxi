@@ -12,12 +12,8 @@ debug:
 	ln -sf Debug/maxq_op .
 
 clean:
-	if [ -d Release ]; then \
-		cd Release; make clean; \
-	fi
-	if [ -d Debug ]; then \
-		cd Debug; make clean; \
-	fi
+	rm -fr Release
+	rm -fr Debug
 	rm -f maxq_op
 	rm -fr *.tbl *.log *.dot
 	rm -fr data/

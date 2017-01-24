@@ -264,7 +264,9 @@ int main(int argc, char **argv) {
     int num_threads = 1;
     if (multithreaded) num_threads = thread::hardware_concurrency();
 
-    vector<double> rewards(episodes, 0.0), time;
+    vector<double> rewards(episodes, 0.0);
+    vector<double> crewards(episodes, 0.0);
+    vector<double> time;
     double avg_time = 0.0;
 
     std::thread t[num_threads];
@@ -290,22 +292,41 @@ int main(int argc, char **argv) {
     }
 
     double avg = 0.0;
+    double cavg = 0.0;
+
     queue<double> Q;
+    queue<double> cQ;
+
     const int N = min(1000, episodes / 10);
     for (int i = 0; i < N; ++i) {
       rewards[i] /= trials;
+
+      if (i == 0)
+        crewards[i] = rewards[i];
+      else
+        crewards[i] = crewards[i - 1] + rewards[i];
+
       avg = (avg * Q.size() + rewards[i]) / (Q.size() + 1);
       Q.push(rewards[i]);
+
+      cavg = (cavg * cQ.size() + crewards[i]) / (cQ.size() + 1);
+      cQ.push(crewards[i]);
     }
 
     for (int i = N; i < episodes; ++i) {
       rewards[i] /= trials;
+      crewards[i] = crewards[i - 1] + rewards[i];
+
       avg = (avg * Q.size() - Q.front() + rewards[i]) / Q.size();
       Q.pop();
       Q.push(rewards[i]);
 
+      cavg = (cavg * cQ.size() - cQ.front() + crewards[i]) / cQ.size();
+      cQ.pop();
+      cQ.push(crewards[i]);
+
       if (i % (max(1, episodes / 100)) == 0) {
-        cout << i << " " << avg << endl;
+        cout << i << " " << avg << " " << cavg << endl;
       }
     }
 
