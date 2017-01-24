@@ -42,7 +42,7 @@ public:
 
   void setVerbose(bool verbose);
 
-  virtual Action plan(const State & state) { return Nil; }
+  virtual Action plan(const State & state) { return Null; }
   virtual void learn(const State &, int, double, const State &, int) { }
   virtual void terminate(const State &, int, double) { }
 
@@ -58,6 +58,8 @@ public:
 
   bool running();
 
+  void showHistory();
+
 public:
   TaxiEnv *env_;
   vector<string> stack;
@@ -66,6 +68,8 @@ public:
   int lastChoiceTime;
   string lastMachineState;
   HashMap<State, HashMap<string, HashMap<int, double>>> qtable_;
+
+  vector<tuple<State, string, Action, double>> history;
 
 public:
   int max_steps;
@@ -100,17 +104,13 @@ public:
   void PopStack();
 
 private:
-  HashMap<string, \
-    HashMap<int, \
-        HashMap<string, double>>> staticTransitions;
+  HashMap<State, HashMap<string, \
+    HashMap<int, HashMap<State, \
+        HashMap<string, double>>>>> staticTransition;
   HashMap<string, int> numChoicesMap;
 
 public:
-  bool isStaticTransition(const string &machine_state, int c);
-  bool hasCircle(HashMap<string, \
-    HashMap<int, \
-        HashMap<string, double>>> &G);
+  bool isStaticTransition(const State &state, const string &machine_state, int c);
 };
-
 
 #endif //MAXQ_OP_HIERARCHICALFSMAGENT_H

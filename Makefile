@@ -19,6 +19,6 @@ clean:
 		cd Debug; make clean; \
 	fi
 	rm -f maxq_op
-	rm -fr *.tbl *.log
+	rm -fr *.tbl *.log *.dot
 	rm -fr data/
 

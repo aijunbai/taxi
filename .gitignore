@@ -28,3 +28,4 @@
 *.app
 .idea
 cmake-build-*
+data.*

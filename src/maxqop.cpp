@@ -222,7 +222,7 @@ MaxQOPAgent::ValuePrimitiveActionPair MaxQOPAgent::ImmediateReward(const State &
 	case East_T: return ValuePrimitiveActionPair(-1, East);
 	case West_T: return ValuePrimitiveActionPair(-1, West);
 
-	default: assert(0); return ValuePrimitiveActionPair(-infty, Nil);
+	default: assert(0); return ValuePrimitiveActionPair(-infty, Null);
 	}
 }
 
@@ -248,20 +248,20 @@ MaxQOPAgent::ValuePrimitiveActionPair MaxQOPAgent::EvaluateState(Task task, cons
 		return ImmediateReward(state, task);
 	}
 	else if (!IsActiveState(task, state) && !IsTerminalState(task, state)) {
-		return ValuePrimitiveActionPair(-infty, Nil);
+		return ValuePrimitiveActionPair(-infty, Null);
 	}
 	else if (IsTerminalState(task, state)) {
-		return ValuePrimitiveActionPair(0, Nil);
+		return ValuePrimitiveActionPair(0, Null);
 	}
 	else if (depths[task] >= max_depth_[task]) {
-		return ValuePrimitiveActionPair(TerminalEvaluation(task, state), Nil);
+		return ValuePrimitiveActionPair(TerminalEvaluation(task, state), Null);
 	}
 	else {
 		if (get_prob() < 0.9 && cache_[task].count(RelevantStateTemplate(task, state)) && cache_[task][RelevantStateTemplate(task, state)].second <= depths[task]) {
 			return cache_[task][RelevantStateTemplate(task, state)].first;
 		}
 
-		ValuePrimitiveActionPair ret(-infty, Nil);
+		ValuePrimitiveActionPair ret(-infty, Null);
 
 		for (map<Task, TransitionFunc*>::iterator it = maxq_[task].begin(); it != maxq_[task].end(); ++it) {
 			if (IsPrimitive(it->first) || !IsTerminalState(it->first, state)) {
@@ -283,7 +283,7 @@ MaxQOPAgent::ValuePrimitiveActionPair MaxQOPAgent::EvaluateState(Task task, cons
 			cache_[task][RelevantStateTemplate(task, state)] = std::make_pair(ret, depths[task]);
 		}
 
-		if (ret.primitive_action == Nil) {
+		if (ret.primitive_action == Null) {
 			assert(0);
 		}
 

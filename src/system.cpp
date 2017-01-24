@@ -7,6 +7,8 @@
 
 #include <iostream>
 #include <cassert>
+#include <unistd.h>
+#include <cstdlib>
 
 #include "state.h"
 #include "system.h"
@@ -16,7 +18,7 @@ using namespace std;
 
 double System::simulate(Agent & agent, bool verbose)
 {
-	const int max_steps = 4096;
+	const int max_steps = 128;
 
 	env_.reset();
 
@@ -79,7 +81,7 @@ double System::simulate(Agent & agent, bool verbose)
 
 double System::simulateFSM(HierarchicalFSMAgent & agent, bool verbose, bool useStaticTransition)
 {
-  const int max_steps = 4096;
+  const int max_steps = 128;
 
   agent.setEnv(&env_);
   agent.setMax_steps(max_steps);

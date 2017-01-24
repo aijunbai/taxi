@@ -19,20 +19,26 @@
 
 set -o nounset                              # Treat unset variables as an error
 
+VERSION="release"
 SIZE="5"
+TRIALS="4"
+EPISODES="1000000"
 PLT="plot.gnuplot"
 
+ulimit -c unlimited
+
 make clean
-make release
+make $VERSION
 mkdir data
 cd data
 
 cp ../${PLT} .
-for alg in H HS; do
-    time ../maxq_op -n $SIZE -Mt -${alg} > ${alg}.out
+for alg in hierarchicalfsm hierarchicalfsmdet; do
+    time ../maxq_op --size $SIZE --trials $TRIALS --episodes $EPISODES \
+        --train --multithreaded --$alg > ${alg}.out &
     echo "'${alg}.out' w l, \\" >> ${PLT}
 done
 
+wait
 gnuplot -p ${PLT}
-
 

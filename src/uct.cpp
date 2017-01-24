@@ -34,8 +34,8 @@ Action UCTAgent::UCT(const State& state)
 	for (int i = 0; i < trials; ++i) {
 #if DEBUG
 		double reward = MCTS(state, 0);
-		std::cerr << ": " << reward <<std::endl;
-		std::cerr << std::endl;
+		std::cout << ": " << reward <<std::endl;
+		std::cout << std::endl;
 #else
 		MCTS(state, 0);
 #endif
@@ -73,7 +73,7 @@ double UCTAgent::MCTS(const State& state, const int depth) //FIXME: no rollout p
 {
 	if (state.terminated() || depth > 1.0 / (1.0 - gamma)) {
 #if DEBUG
-		std::cerr << "[" << state << "]";
+		std::cout << "[" << state << "]";
 #endif
 		return 0.0;
 	}
@@ -83,7 +83,7 @@ double UCTAgent::MCTS(const State& state, const int depth) //FIXME: no rollout p
 	  std::pair<State, double> sample = TaxiEnv::Sample(state, action);
 
 	#if DEBUG
-	  std::cerr << "[" << state << ", " << action_name(action) << "] -> ";
+	  std::cout << "[" << state << ", " << action_name(action) << "] -> ";
 	#endif
 
 	  int n = state_action_counts_[state][action];

@@ -121,7 +121,7 @@ vector<pair<State, double> > TaxiEnv::Transition(const State & state, Action act
       }
         break;
       case Fillup:
-        if (pos == EnvModel::ins().getFuel_()) {
+        if (pos == EnvModel::ins().getFuelPosition_()) {
           State tmp(state);
           tmp.fuel() = State::MAX_FUEL;
           samples.push_back(make_pair(tmp, 1.0));
@@ -166,7 +166,7 @@ double TaxiEnv::Reward(const State & state, Action action)
     case West:
       return -1;
     case Fillup:
-      if (pos == EnvModel::ins().getFuel_()) {
+      if (pos == EnvModel::ins().getFuelPosition_()) {
         return -1;
       }
       else {
@@ -178,9 +178,6 @@ double TaxiEnv::Reward(const State & state, Action action)
 
 void TaxiEnv::reset()
 {
-  srand(0);
-  srand48(0);
-
   Position taxi;
   int passenger, destination, fuel;
 

@@ -73,7 +73,7 @@ double DPAgent::UpdateValue(const State & state)
 pair<double, Action> DPAgent::Greedy(const State & state)
 {
 	double max = -1.0e6;
-	Action best = Nil;
+	Action best = Null;
 
 	for (int i = 0; i < ActionSize; ++i) {
 		double tmp = qtable_[state][i];

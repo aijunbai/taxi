@@ -76,7 +76,7 @@ private:
 		double value;
 		Action primitive_action;
 
-		explicit ValuePrimitiveActionPair(double v = -infty, Action a = Nil): value(v), primitive_action(a) { }
+		explicit ValuePrimitiveActionPair(double v = -infty, Action a = Null): value(v), primitive_action(a) { }
 	};
 
 	static const int infty = 1e6;
@@ -206,7 +206,7 @@ private:
 		}
 
 		assert(0);
-		return Nil;
+		return Null;
 	}
 
 	static Action sample_primitive(Task action) {

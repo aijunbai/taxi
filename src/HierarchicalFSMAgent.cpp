@@ -26,38 +26,41 @@ HierarchicalFSMAgent::~HierarchicalFSMAgent() {
 //      pa.second.save(name() + "_" + pa.first);
 //    }
 
-    if (useStaticTransition) {
-      saveStaticTransitions(name() + "_transitions.xml");
-
-      dot::Graph G;
-      for (auto &e : staticTransitions) {
-        auto s = to_prettystring(e.first);
-        boost::replace_all(s, ", {", ",\n{");
-        G.addNode(s, "red");
-        for (auto &o : e.second) {
-          auto a = to_string(o.first);
-          auto sa = s + ";  " + a;
-          G.addNode(sa, "gray");
-          G.addEdge(s, sa, "blue", a);
-          for (auto &x : o.second) {
-            auto s_ = to_prettystring(x.first);
-            boost::replace_all(s_, ", {", ",\n{");
-            auto n = to_string(x.second);
-            G.addNode(s_, "orange");
-            G.addEdge(sa, s_, "green", n);
-          }
-        }
-      }
-
-      G.dump(name() + "_transitions.dot");
-    }
+//    if (useStaticTransition) {
+//      saveStaticTransitions(name() + "_transitions.xml");
+//
+//      dot::Graph G;
+//      for (auto &e : staticTransitions) {
+//        auto s = to_prettystring(e.first);
+//        boost::replace_all(s, ", {", ",\n{");
+//        G.addNode(s, "red");
+//        for (auto &o : e.second) {
+//          auto a = to_string(o.first);
+//          auto sa = s + ";  " + a;
+//          G.addNode(sa, "gray");
+//          G.addEdge(s, sa, "blue", a);
+//          for (auto &x : o.second) {
+//            auto s_ = to_prettystring(x.first);
+//            boost::replace_all(s_, ", {", ",\n{");
+//            auto n = to_string(x.second);
+//            G.addNode(s_, "orange");
+//            G.addEdge(sa, s_, "green", n);
+//          }
+//        }
+//      }
+//
+//      G.dump(name() + "_transitions.dot");
+//    }
   }
 }
 
 void HierarchicalFSMAgent::step(Action a) {
+  auto state = env_->get_state();
+  auto machineState = getMachineState();
+
   if (verbose) {
-    cout << "Step " << steps << " | State: " << env_->get_state()
-         << " x MachineState: " << getMachineState()
+    cout << "Step " << steps << " | State: " << state
+         << " x MachineState: " << machineState
          << " | Action: " << action_name(Action(a));
   }
 
@@ -70,6 +73,16 @@ void HierarchicalFSMAgent::step(Action a) {
 
   if (verbose) {
     cout << " | Reward: " << reward << endl;
+  }
+
+  history.push_back(make_tuple(state, machineState, a, reward));
+}
+
+void HierarchicalFSMAgent::showHistory()
+{
+  int t = 0;
+  for (auto &e : history) {
+    cout << "Step: " << t++ << " {{\n" << e << "\n}}\n" << endl;
   }
 }
 
@@ -104,8 +117,7 @@ void HierarchicalFSMAgent::reset() {
   lastChoiceTime = -1;
   stack.clear();
   lastMachineState.clear();
-
-  staticTransitions.clear(); // dependent on input state
+  history.clear();
 }
 
 void HierarchicalFSMAgent::PushStack(const string &s) {
@@ -177,19 +189,7 @@ int HierarchicalFSMAgent::Qupdate(
   if (useStaticTransition &&
       current_time == lastChoiceTime && lastMachineState.size() &&
       machineState.size() && lastMachineState != machineState) {
-    staticTransitions[lastMachineState][lastChoice][machineState] += 1.0;
-
-    if (hasCircle(staticTransitions)) {
-      staticTransitions[lastMachineState][lastChoice].erase(
-          machineState);
-      if (staticTransitions[lastMachineState][lastChoice].empty()) {
-        staticTransitions[lastMachineState].erase(lastChoice);
-        if (staticTransitions[lastMachineState].empty()) {
-          staticTransitions.erase(lastMachineState);
-        }
-      }
-      assert(!hasCircle(staticTransitions));
-    }
+    staticTransition[lastState][lastMachineState][lastChoice][state][machineState] += 1.0;
   }
 
   double &q = Q(lastState, lastMachineState, lastChoice);
@@ -205,48 +205,13 @@ int HierarchicalFSMAgent::Qupdate(
   lastChoiceTime = current_time;
   return i;
 }
-namespace {
-bool dfs(
-    const string &root,
-    HashMap<string,
-        HashMap<int, HashMap<string, double>>> &G,
-    HashSet<string> &visited,
-    HashSet<string> &path) {
-  if (path.count(root)) {
-    return true;
-  }
 
-  visited.insert(root);
-  path.insert(root);
-  if (G.count(root)) {
-    for (auto &pa : G[root]) {
-      for (auto &next : pa.second) {
-        if (dfs(next.first, G, visited, path))
-          return true;
-      }
-    }
-  }
-  return false;
-};
-}
-
-bool HierarchicalFSMAgent::hasCircle(HashMap<string, \
-    HashMap<int, \
-        HashMap<string, double>>> &G)
-{
-  HashSet<string> visited;
-  for (auto &pa : G) {
-    HashSet<string> path;
-    if (!visited.count(pa.first) && dfs(pa.first, G, visited, path))
-      return true;
-  }
-  return false;
-}
-
-bool HierarchicalFSMAgent::isStaticTransition(const string &machine_state, int c) {
-  return staticTransitions.count(machine_state) &&
-         staticTransitions[machine_state].count(c) &&
-         staticTransitions[machine_state][c].size();
+bool HierarchicalFSMAgent::isStaticTransition(
+    const State &state, const string &machine_state, int c) {
+  return staticTransition.count(state) &&
+         staticTransition[state].count(machine_state) &&
+         staticTransition[state][machine_state].count(c) &&
+         staticTransition[state][machine_state][c].size();
 }
 
 bool HierarchicalFSMAgent::isUseStaticTransition() const {
@@ -258,17 +223,21 @@ void HierarchicalFSMAgent::setUseStaticTransition(bool useStaticTransition) {
 }
 
 double & HierarchicalFSMAgent::Q(const State &state, const string &machineState, int choice) {
-  if (useStaticTransition && isStaticTransition(machineState, choice)) {
+  if (useStaticTransition && isStaticTransition(state, machineState, choice)) {
     double ret = 0.0;
     double sum = 0.0;
-    for (auto &e : staticTransitions[machineState][choice]) {
-      if (e.first != machineState) {
-        assert(numChoicesMap.count(e.first));
-        auto num_choices = numChoicesMap[e.first];
-        ret += e.second * V(state, e.first, num_choices);
-        sum += e.second;
+
+    for (auto &e : staticTransition[state][machineState][choice]) {
+      for (auto &ee : e.second) {
+        if (ee.first != machineState) {
+          assert(numChoicesMap.count(ee.first));
+          auto num_choices = numChoicesMap[ee.first];
+          ret += ee.second * V(e.first, ee.first, num_choices);
+          sum += ee.second;
+        }
       }
     }
+
     if (sum > 0.0) {
       qtable_[state][machineState][choice] = ret / sum;
     }

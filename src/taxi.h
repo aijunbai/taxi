@@ -29,8 +29,29 @@ enum Action {
   Fillup,
 
   ActionSize,
-  Nil
+  Null
 };
+
+inline std::ostream& operator<<(std::ostream& out, const Action value) {
+  static unordered_map<int, string> strings;
+
+  if (strings.size() == 0) {
+#define INSERT_ELEMENT(p) strings[p] = #p
+    INSERT_ELEMENT(North);
+    INSERT_ELEMENT(South);
+    INSERT_ELEMENT(East);
+    INSERT_ELEMENT(West);
+    INSERT_ELEMENT(Pickup);
+    INSERT_ELEMENT(Putdown);
+    INSERT_ELEMENT(Fillup);
+    INSERT_ELEMENT(ActionSize);
+    INSERT_ELEMENT(Null);
+#undef INSERT_ELEMENT
+  }
+
+  return out << strings[value];
+}
+
 
 inline std::string action_name(Action action)
 {
@@ -91,7 +112,7 @@ public:
       terminals_.push_back(Position(SIZE - 1, SIZE - 1));
 
       inTaxi_ = terminals_.size();
-      fuel_ = Position(2, 1);
+      fuelPosition_ = Position(2, 1);
 
       for (int x = 0; x < SIZE; ++x) {
         for (int y = 0; y < SIZE; ++y) {
@@ -140,7 +161,7 @@ public:
 
   private:
     std::vector<Position> terminals_;
-    Position fuel_;
+    Position fuelPosition_;
     int inTaxi_;
 
   public:
@@ -149,8 +170,8 @@ public:
     }
 
   public:
-    const Position &getFuel_() const {
-      return fuel_;
+    const Position &getFuelPosition_() const {
+      return fuelPosition_;
     }
 
   public:
@@ -178,6 +199,10 @@ public:
 
   bool loaded() {
     return state_.passenger() == EnvModel::ins().getInTaxi_();
+  }
+
+  bool refueled() {
+    return taxi() == EnvModel::ins().getFuelPosition_() && state_.fuel() == State::MAX_FUEL;
   }
 
   bool terminated() {

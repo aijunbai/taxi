@@ -87,7 +87,7 @@ Action AStarAgent::astar(const State & start)
 	std::priority_queue<Node*, std::vector<Node*>, NodePtrCompair> openqueue;
 	std::set<State> closedset;
 
-	openqueue.push(create_node(start, 0, 0, Nil));
+	openqueue.push(create_node(start, 0, 0, Null));
 
 	while (!openqueue.empty()) {
 		Node *node = openqueue.top();
@@ -137,5 +137,5 @@ Action AStarAgent::astar(const State & start)
 		}
 	}
 
-	return Nil;
+	return Null;
 }

@@ -19,8 +19,10 @@
 
 set -o nounset                              # Treat unset variables as an error
 
+ulimit -c unlimited
+
 make clean
 make debug
 
-valgrind ./maxq_op -n 5 -Mt -HS 2>&1 | tee -a valgrind.log
+valgrind ./maxq_op --size 5 --multithreaded --trials 8 --episodes 1000 --train --hierarchicalfsmdet 2>&1 | tee -a valgrind.log
 

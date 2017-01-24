@@ -60,7 +60,8 @@ void call_from_thread(int tid,
                       bool useStaticTransition) {
   for (int i = 0; i < trials; ++i) {
     if (i % num_threads == tid) {
-      cerr << "#trials " << i << endl;
+      cerr << "#trials #" << i << endl;
+
       Agent *agent = CreatorAgent(algorithm, true);
 
       struct timeval start, end;
@@ -68,7 +69,10 @@ void call_from_thread(int tid,
       gettimeofday(&start, NULL);
 
       for (int j = 0; j < episodes; ++j) {
-        cerr << "#episodes " << j << endl;
+        if (j % 1000 == 0) {
+          cerr << "#episodes #" << j << endl;
+        }
+
         double r = 0.0;
         if (algorithm == ALG_HierarchicalFSM) {
           r = System().simulateFSM(*static_cast<HierarchicalFSMAgent *>(agent), verbose, useStaticTransition);
@@ -103,27 +107,31 @@ int main(int argc, char **argv) {
   bool verbose = false;
   bool useStaticTransition = false;
   bool multithreaded = false;
+  int trials = 4;
+  int episodes = 10000;
 
   try {
     po::options_description desc("Allowed options");
     desc.add_options()
-        ("help,h", "produce help message")
-        ("verbose,v", "verbose mode")
-        ("debug,D", "debug mode (do not set random seed)")
-        ("profile,p", "profile a policy or an online policy")
-        ("train,t", "set as train mode")
-        ("monte-carlo,m", "use MonteCarlo algorithm")
-        ("sasar,s", "use SASAR algorithm")
-        ("qlearning,q", "use Qlearning algorithm")
-        ("sasar-lambda,l", "use SASAR-lambda algorithm")
-        ("maxq-ol,o", "use MaxQ-OP algorithm")
-        ("dynamicprogramming,d", "use DynamicProgramming algorithm")
-        ("astar,a", "use A* algorithm")
-        ("uct,u", "use UCT algorithm")
-        ("hierarchicalfsm,H", "use hierarchical FSM algorithm")
-        ("size,n", po::value<int>(&TaxiEnv::SIZE), "Problem size")
-        ("multithreaded,M", "use multi thread mode")
-        ("statictransition,S", "take advantage of static transitions")
+        ("help", "produce help message")
+        ("verbose", "verbose mode")
+        ("debug", "debug mode (do not set random seed)")
+        ("profile", "profile a policy or an online policy")
+        ("train", "set as train mode")
+        ("montecarlo", "use MonteCarlo algorithm")
+        ("sasar", "use SASAR algorithm")
+        ("qlearning", "use Qlearning algorithm")
+        ("sasarlambda", "use SASAR-lambda algorithm")
+        ("maxqop", "use MaxQ-OP algorithm")
+        ("dynamicprogramming", "use DynamicProgramming algorithm")
+        ("astar", "use A* algorithm")
+        ("uct", "use UCT algorithm")
+        ("hierarchicalfsm", "use hierarchical FSM algorithm")
+        ("hierarchicalfsmdet", "take advantage of static transitions for hierarchicalfsm")
+        ("size", po::value<int>(&TaxiEnv::SIZE), "Problem size")
+        ("trials", po::value<int>(&trials), "Training trials")
+        ("episodes", po::value<int>(&episodes), "Training episodes")
+        ("multithreaded", "use multi thread mode")
         ;
 
     po::variables_map vm;
@@ -139,7 +147,7 @@ int main(int argc, char **argv) {
     profile = vm.count("profile");
     verbose = vm.count("verbose");
     multithreaded = vm.count("multithreaded");
-    useStaticTransition = vm.count("statictransition");
+    useStaticTransition = vm.count("hierarchicalfsmdet");
 
     if (vm.count("monte-carlo")) {
       algorithm = ALG_MonteCarlo;
@@ -165,48 +173,52 @@ int main(int argc, char **argv) {
     else if (vm.count("uct")) {
       algorithm = ALG_UCT;
     }
-    else if (vm.count("hierarchicalfsm")) {
+    else if (vm.count("hierarchicalfsm") || vm.count("hierarchicalfsmdet")) {
       algorithm = ALG_HierarchicalFSM;
     }
     else {
-      cout << desc << "\n";
+      cout << "Can not find an algorithm" << endl;
+      cout << desc << endl;
       return 1;
     }
 
     if (!vm.count("debug")) {
       set_random_seed(getpid());
     }
+    else {
+      set_random_seed(0);
+    }
   }
   catch(exception& e) {
-    cerr << "error: " << e.what() << "\n";
+    cout << "error: " << e.what() << "\n";
     return 1;
   }
   catch(...) {
-    cerr << "Exception of unknown type!\n";
+    cout << "Exception of unknown type!\n";
     return 1;
   }
 
+  PRINT_VALUE(ActionSize); // initialize cache
+
   if (profile) {
     double avg_reward = 0.0, avg_time = 0.0;
-    int trials = 10000;
+    int N = 10000;
 
     vector<double> rewards, time;
 
     Agent *agent = CreatorAgent(algorithm, false);
 
-    for (int trial = 0; trial < trials; ++trial) {
-      System system;
-
+    for (int n = 0; n < N; ++n) {
       struct timeval start, end;
       double time_use;
       gettimeofday(&start, NULL);
 
       double reward = 0.0;
       if (algorithm == ALG_HierarchicalFSM) {
-        reward = system.simulateFSM(*static_cast<HierarchicalFSMAgent*>(agent), verbose, useStaticTransition);
+        reward = System().simulateFSM(*static_cast<HierarchicalFSMAgent*>(agent), verbose, useStaticTransition);
       }
       else {
-        reward = system.simulate(*agent, verbose);
+        reward = System().simulate(*agent, verbose);
       }
 
       gettimeofday(&end, NULL);
@@ -222,19 +234,19 @@ int main(int argc, char **argv) {
 
     delete agent;
 
-    avg_reward /= trials;
-    avg_time /= trials;
+    avg_reward /= N;
+    avg_time /= N;
 
     double sum_rewards = 0.0, sum_time = 0.0;
-    for (int i = 0; i < trials; ++i) {
+    for (int i = 0; i < N; ++i) {
       sum_rewards += (rewards[i] - avg_reward) * (rewards[i] - avg_reward);
 
       sum_time += (time[i] - avg_time) * (time[i] - avg_time);
     }
 
     cout << TaxiEnv::SIZE << " ";
-    cout << avg_reward << " " << sqrt(sum_rewards) / trials << " ";
-    cout << avg_time << " " << sqrt(sum_time) / trials << endl;
+    cout << avg_reward << " " << sqrt(sum_rewards) / N << " ";
+    cout << avg_time << " " << sqrt(sum_time) / N << endl;
   }
   else if (!train) { //test
     Agent *agent = CreatorAgent(algorithm, false);
@@ -251,9 +263,6 @@ int main(int argc, char **argv) {
   else { //train for rl agent
     int num_threads = 1;
     if (multithreaded) num_threads = thread::hardware_concurrency();
-
-    const int trials = 4;
-    const int episodes = 100000;
 
     vector<double> rewards(episodes, 0.0), time;
     double avg_time = 0.0;
@@ -282,7 +291,7 @@ int main(int argc, char **argv) {
 
     double avg = 0.0;
     queue<double> Q;
-    const int N = 1000;
+    const int N = min(1000, episodes / 10);
     for (int i = 0; i < N; ++i) {
       rewards[i] /= trials;
       avg = (avg * Q.size() + rewards[i]) / (Q.size() + 1);
@@ -295,7 +304,7 @@ int main(int argc, char **argv) {
       Q.pop();
       Q.push(rewards[i]);
 
-      if (i % (episodes / 100) == 0) {
+      if (i % (max(1, episodes / 100)) == 0) {
         cout << i << " " << avg << endl;
       }
     }

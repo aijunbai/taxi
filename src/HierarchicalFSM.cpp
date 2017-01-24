@@ -44,7 +44,7 @@ Root::Root(HierarchicalFSMAgent *p): HierarchicalFSM(p, "$Root") {
   put = new Put(p);
   refuel = new Refuel(p);
 
-  choice = new ChoicePoint<HierarchicalFSM *>("@Root", {get, put, refuel});
+  choice = new ChoicePoint<HierarchicalFSM *>("@RootGet", {get, put, refuel});
 }
 
 Root::~Root() {
@@ -61,6 +61,7 @@ void Root::run(const vector<string> & parameters) {
     auto m = c();
     Runner(m).operator()();
   }
+
   agent->Qupdate(state(), machineState(), 1, agent->steps);
 }
 
@@ -90,16 +91,12 @@ Get::~Get() {
 }
 
 void Get::run(const vector<string> & parameters) {
-  Runner(nav, {to_string(state().passenger())}).operator()();
   if (running()) {
-    Runner(pickup).operator()();
+    Runner(nav, {to_string(state().passenger())}).operator()();
+    if (running()) {
+      Runner(pickup).operator()();
+    }
   }
-
-//  while (running() && !agent->env()->loaded()) {
-//    MakeChoice<HierarchicalFSM *> c(this, choice);
-//    auto m = c();
-//    Runner(m, {to_string(state().passenger())}).operator()();
-//  }
 }
 
 Put::Put(HierarchicalFSMAgent *p): HierarchicalFSM(p, "$Put") {
@@ -117,23 +114,19 @@ Put::~Put() {
 }
 
 void Put::run(const vector<string> & parameters) {
-  Runner(nav, {to_string(state().destination())}).operator()();
   if (running()) {
-    Runner(putdown).operator()();
+    Runner(nav, {to_string(state().destination())}).operator()();
+    if (running()) {
+      Runner(putdown).operator()();
+    }
   }
-
-//  while (running() && !agent->env()->unloaded()) {
-//    MakeChoice<HierarchicalFSM *> c(this, choice);
-//    auto m = c();
-//    Runner(m, {to_string(state().destination())}).operator()();
-//  }
 }
 
 Refuel::Refuel(HierarchicalFSMAgent *p): HierarchicalFSM(p, "$Refuel") {
   fillup = new Primitive(p, Fillup, action_name(Fillup));
   nav = new Navigate(p);
 
-  choice = new ChoicePoint<HierarchicalFSM *>("@Get", {fillup, nav});
+  choice = new ChoicePoint<HierarchicalFSM *>("@Refuel", {fillup, nav});
 }
 
 Refuel::~Refuel() {
@@ -144,16 +137,12 @@ Refuel::~Refuel() {
 }
 
 void Refuel::run(const vector<string> & parameters) {
-  Runner(nav, {"F"}).operator()();
   if (running()) {
-    Runner(fillup).operator()();
+    Runner(nav, {"F"}).operator()();
+    if (running()) {
+      Runner(fillup).operator()();
+    }
   }
-
-//  while (running() && !agent->env()->loaded()) {
-//    MakeChoice<HierarchicalFSM *> c(this, choice);
-//    auto m = c();
-//    Runner(m, {"F"}).operator()();
-//  }
 }
 
 Navigate::Navigate(HierarchicalFSMAgent *p): HierarchicalFSM(p, "$Nav") {
@@ -178,7 +167,7 @@ Navigate::~Navigate() {
 
 void Navigate::run(const vector<string> & parameters) {
   char c = parameters[0][0];
-  TaxiEnv::Position target = c == 'F'? TaxiEnv::EnvModel::ins().getFuel_() : agent->env()->terminal(c - '0');
+  TaxiEnv::Position target = c == 'F'? TaxiEnv::EnvModel::ins().getFuelPosition_() : agent->env()->terminal(c - '0');
 
   while (running() && agent->env()->taxi() != target) {
     MakeChoice<HierarchicalFSM *> c1(this, dir_choice);
