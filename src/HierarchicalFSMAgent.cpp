@@ -107,7 +107,7 @@ void HierarchicalFSMAgent::reset() {
   epsilon = 0.01;
   alpha = 0.125;
   rewards = 0.0;
-  gamma = 0.98;
+  gamma = 1.0;
   steps = 0;
   accumulatedRewards = 0.0;
   accumulatedDiscount = 1.0;

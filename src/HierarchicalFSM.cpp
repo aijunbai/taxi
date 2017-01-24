@@ -170,14 +170,16 @@ void Navigate::run(const vector<string> & parameters) {
   TaxiEnv::Position target = c == 'F'? TaxiEnv::EnvModel::ins().getFuelPosition_() : agent->env()->terminal(c - '0');
 
   while (running() && agent->env()->taxi() != target) {
-    MakeChoice<HierarchicalFSM *> c1(this, dir_choice);
-    auto m = c1();
+    MakeChoice<HierarchicalFSM *> c(this, dir_choice);
+    auto m = c();
 
-//    MakeChoice<int> c2(this, step_choice);
-//    auto n = c2();
+    {
+      MakeChoice<int> c(this, step_choice);
+      auto n = c();
 
-    for (int i = 0; i < 1 /*n*/; ++i) {
-      Runner(m).operator()();
+      for (int i = 0; i < n; ++i) {
+        Runner(m).operator()();
+      }
     }
   }
 }
