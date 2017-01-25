@@ -124,6 +124,8 @@ public:
   Position passenger() { return terminal(state_.passenger()); };
   Position terminal(int i) { return Model::ins().terminals().operator[](i); };
 
+  size_t stateFeature(const State &state);
+
 private:
   Position get_random_position() {
     return Position(rand() % SIZE, rand() % SIZE);

@@ -36,7 +36,7 @@ enum Action {
 };
 
 inline std::ostream& operator<<(std::ostream& out, const Action value) {
-  static unordered_map<int, string> strings;
+  static std::unordered_map<int, string> strings;
 
   if (strings.size() == 0) {
 #define INSERT_ELEMENT(p) strings[p] = #p

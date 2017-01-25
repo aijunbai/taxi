@@ -104,9 +104,10 @@ public:
   void PopStack();
 
 private:
-  HashMap<State, HashMap<string, \
-    HashMap<int, HashMap<State, \
-        HashMap<string, double>>>>> staticTransition;
+  HashMap<size_t, \
+  HashMap<string, \
+    HashMap<int, \
+        HashMap<string, double>>>> staticTransition;
   HashMap<string, int> numChoicesMap;
 
 public:

@@ -22,14 +22,14 @@ set -o nounset                              # Treat unset variables as an error
 VERSION="release"
 SIZE="5"
 TRIALS="4"
-EPISODES="10000000"
+EPISODES="1000000"
 PLT="plot.gnuplot"
 
 ulimit -c unlimited
 
 make clean
 make $VERSION
-mkdir data
+mkdir -p data
 cd data
 
 cp ../${PLT} plot.gnuplot

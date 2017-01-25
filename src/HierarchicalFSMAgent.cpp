@@ -88,18 +88,6 @@ void HierarchicalFSMAgent::showHistory()
 
 bool HierarchicalFSMAgent::running() {
   bool ret = !env()->state().terminated() && steps < max_steps;
-
-  if (!ret) {
-    if (verbose) {
-      if (env()->state().unloaded()) {
-        cout << " | Success" << endl;
-      }
-      else {
-        cout << " | Failure" << endl;
-      }
-    }
-  }
-
   return ret;
 }
 
@@ -190,7 +178,9 @@ int HierarchicalFSMAgent::Qupdate(
   if (useStaticTransition &&
       current_time == lastChoiceTime && lastMachineState.size() &&
       machineState.size() && lastMachineState != machineState) {
-    staticTransition[lastState][lastMachineState][lastChoice][state][machineState] += 1.0;
+    assert(lastState == state);
+    auto feature = env()->stateFeature(lastState);
+    staticTransition[feature][lastMachineState][lastChoice][machineState] += 1.0;
   }
 
   double &q = Q(lastState, lastMachineState, lastChoice);
@@ -209,10 +199,10 @@ int HierarchicalFSMAgent::Qupdate(
 
 bool HierarchicalFSMAgent::isStaticTransition(
     const State &state, const string &machine_state, int c) {
-  return staticTransition.count(state) &&
-         staticTransition[state].count(machine_state) &&
-         staticTransition[state][machine_state].count(c) &&
-         staticTransition[state][machine_state][c].size();
+  auto feature = env()->stateFeature(state);
+  return staticTransition[feature].count(machine_state) &&
+         staticTransition[feature][machine_state].count(c) &&
+         staticTransition[feature][machine_state][c].size();
 }
 
 bool HierarchicalFSMAgent::isUseStaticTransition() const {
@@ -228,14 +218,13 @@ double & HierarchicalFSMAgent::Q(const State &state, const string &machineState,
     double ret = 0.0;
     double sum = 0.0;
 
-    for (auto &e : staticTransition[state][machineState][choice]) {
-      for (auto &ee : e.second) {
-        if (ee.first != machineState) {
-          assert(numChoicesMap.count(ee.first));
-          auto num_choices = numChoicesMap[ee.first];
-          ret += ee.second * V(e.first, ee.first, num_choices);
-          sum += ee.second;
-        }
+    auto feature = env()->stateFeature(state);
+    for (auto &e : staticTransition[feature][machineState][choice]) {
+      if (e.first != machineState) {
+        assert(numChoicesMap.count(e.first));
+        auto num_choices = numChoicesMap[e.first];
+        ret += e.second * V(state, e.first, num_choices);
+        sum += e.second;
       }
     }
 

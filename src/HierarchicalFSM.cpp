@@ -177,7 +177,7 @@ void Navigate::run(const vector<string> & parameters) {
       MakeChoice<int> c(this, step_choice);
       auto n = c();
 
-      for (int i = 0; i < n; ++i) {
+      for (int i = 0; i < n && running() && agent->env()->state().taxiPosition() != target; ++i) {
         Runner(m).operator()();
       }
     }
