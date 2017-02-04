@@ -21,9 +21,16 @@ set -o nounset                              # Treat unset variables as an error
 
 VERSION="release"
 SIZE="5"
-TRIALS="4"
 EPISODES="1000000"
 PLT="plot.gnuplot"
+OPT=""
+
+NPROC="`nproc`"
+TRIALS="`expr $NPROC / 4`"
+
+if [ $VERSION = "debug" ]; then
+    OPT="--debug $OPT"
+fi
 
 ulimit -c unlimited
 
@@ -34,16 +41,16 @@ cd data
 
 cp ../${PLT} plot.gnuplot
 cp ../${PLT} cplot.gnuplot
+cp ../plot.sh .
 
-for alg in hierarchicalfsm hierarchicalfsmdet; do
-    time ../maxq_op --size $SIZE --trials $TRIALS --episodes $EPISODES \
-        --train --multithreaded --$alg > ${alg}.out
+for alg in hierarchicalfsm hierarchicalfsmdet maxq0 maxqq; do
+    time ../maxq_op $OPT --size $SIZE --trials $TRIALS --episodes $EPISODES \
+        --train --multithreaded --$alg > ${alg}.out &
     echo "'${alg}.out' u 1:2 w l, \\" >> plot.gnuplot
     echo "'${alg}.out' u 1:3 w l, \\" >> cplot.gnuplot
 done
 
-gnuplot -p plot.gnuplot &
-gnuplot -p cplot.gnuplot &
-
 wait
+
+./plot.sh
 

@@ -9,48 +9,40 @@
 
 using namespace fsm;
 
-HierarchicalFSMAgent::HierarchicalFSMAgent(const bool test): Agent(test) {
+HierarchicalFSMAgent::HierarchicalFSMAgent(const bool test): HierarchicalAgent(test) {
   max_steps = 1024;
   verbose = false;
-  useStaticTransition = false;
 
   reset();
-
-  if (useStaticTransition)
-    loadStaticTransitions(name() + "_transitions.xml");
 }
 
 HierarchicalFSMAgent::~HierarchicalFSMAgent() {
   if (!test()) {
-//    for (auto &pa : qtable_) {
-//      pa.second.save(name() + "_" + pa.first);
-//    }
+    if (leverageInternalTransitions()) {
+      for (auto &o : internalTransitions) {
+        dot::Graph G;
+        for (auto &e : o.second) {
+          auto s = to_prettystring(e.first);
+          boost::replace_all(s, ", {", ",\n{");
+          G.addNode(s, "red");
+          for (auto &o : e.second) {
+            auto a = to_prettystring(o.first);
+            auto sa = s + ";  " + a;
+            G.addNode(sa, "gray");
+            G.addEdge(s, sa, "blue", a);
+            for (auto &x : o.second) {
+              auto s_ = to_prettystring(x.first);
+              boost::replace_all(s_, ", {", ",\n{");
+              auto n = to_string(x.second);
+              G.addNode(s_, "orange");
+              G.addEdge(sa, s_, "green", n);
+            }
+          }
+        }
 
-//    if (useStaticTransition) {
-//      saveStaticTransitions(name() + "_transitions.xml");
-//
-//      dot::Graph G;
-//      for (auto &e : staticTransitions) {
-//        auto s = to_prettystring(e.first);
-//        boost::replace_all(s, ", {", ",\n{");
-//        G.addNode(s, "red");
-//        for (auto &o : e.second) {
-//          auto a = to_string(o.first);
-//          auto sa = s + ";  " + a;
-//          G.addNode(sa, "gray");
-//          G.addEdge(s, sa, "blue", a);
-//          for (auto &x : o.second) {
-//            auto s_ = to_prettystring(x.first);
-//            boost::replace_all(s_, ", {", ",\n{");
-//            auto n = to_string(x.second);
-//            G.addNode(s_, "orange");
-//            G.addEdge(sa, s_, "green", n);
-//          }
-//        }
-//      }
-//
-//      G.dump(name() + "_transitions.dot");
-//    }
+        G.dump(name() + "_" + to_string(o.first) + "_transitions.dot");
+      }
+    }
   }
 }
 
@@ -92,14 +84,10 @@ bool HierarchicalFSMAgent::running() {
 }
 
 void HierarchicalFSMAgent::reset() {
-  epsilon = 0.01;
-  alpha = 0.125;
-  rewards = 0.0;
-  gamma = 1.0;
-  steps = 0;
+  HierarchicalAgent::reset();
+
   accumulatedRewards = 0.0;
   accumulatedDiscount = 1.0;
-
   lastState = {0, 0, 0, 0, 0};
   lastChoice = 0;
   lastChoiceTime = -1;
@@ -121,14 +109,6 @@ double HierarchicalFSMAgent::run() {
   Runner(machine).operator()();
   delete machine;
   return rewards;
-}
-
-void HierarchicalFSMAgent::setVerbose(bool verbose) {
-  HierarchicalFSMAgent::verbose = verbose;
-}
-
-void HierarchicalFSMAgent::setMax_steps(int max_steps) {
-  HierarchicalFSMAgent::max_steps = max_steps;
 }
 
 int HierarchicalFSMAgent::selectChoice(const State &state, const string &machineState, int numChoices) {
@@ -175,12 +155,27 @@ int HierarchicalFSMAgent::Qupdate(
   assert(!numChoicesMap.count(machineState) || numChoicesMap[machineState] == numChoices);
   numChoicesMap[machineState] = numChoices;
 
-  if (useStaticTransition &&
+  if (leverageInternalTransitions() &&
       current_time == lastChoiceTime && lastMachineState.size() &&
       machineState.size() && lastMachineState != machineState) {
+    auto cond = env()->stateConditions(lastState);
     assert(lastState == state);
-    auto feature = env()->stateFeature(lastState);
-    staticTransition[feature][lastMachineState][lastChoice][machineState] += 1.0;
+
+//    std::vector<std::string> x = split(machineState, ',');
+//
+//    auto t = x[4][8];
+//    if (x[2][3] == 'G') {
+//      assert(t == '4' || t == '0' + get<0>(cond));
+//    }
+//    else if (x[2][3] == 'P') {
+//      assert(t == '0' + get<1>(cond));
+//    }
+//    else {
+//      assert(t == 'F');
+//    }
+
+    internalTransitions[cond][lastMachineState][lastChoice][machineState] += 1.0;
+    assert(internalTransitions[cond][lastMachineState][lastChoice].size() == 1);
   }
 
   double &q = Q(lastState, lastMachineState, lastChoice);
@@ -199,27 +194,19 @@ int HierarchicalFSMAgent::Qupdate(
 
 bool HierarchicalFSMAgent::isStaticTransition(
     const State &state, const string &machine_state, int c) {
-  auto feature = env()->stateFeature(state);
-  return staticTransition[feature].count(machine_state) &&
-         staticTransition[feature][machine_state].count(c) &&
-         staticTransition[feature][machine_state][c].size();
-}
-
-bool HierarchicalFSMAgent::isUseStaticTransition() const {
-  return useStaticTransition;
-}
-
-void HierarchicalFSMAgent::setUseStaticTransition(bool useStaticTransition) {
-  HierarchicalFSMAgent::useStaticTransition = useStaticTransition;
+  auto cond = env()->stateConditions(state);
+  return internalTransitions[cond].count(machine_state) &&
+         internalTransitions[cond][machine_state].count(c) &&
+         internalTransitions[cond][machine_state][c].size();
 }
 
 double & HierarchicalFSMAgent::Q(const State &state, const string &machineState, int choice) {
-  if (useStaticTransition && isStaticTransition(state, machineState, choice)) {
+  if (leverageInternalTransitions() && isStaticTransition(state, machineState, choice)) {
     double ret = 0.0;
     double sum = 0.0;
 
-    auto feature = env()->stateFeature(state);
-    for (auto &e : staticTransition[feature][machineState][choice]) {
+    auto cond = env()->stateConditions(state);
+    for (auto &e : internalTransitions[cond][machineState][choice]) {
       if (e.first != machineState) {
         assert(numChoicesMap.count(e.first));
         auto num_choices = numChoicesMap[e.first];
@@ -236,18 +223,3 @@ double & HierarchicalFSMAgent::Q(const State &state, const string &machineState,
   return qtable_[state][machineState][choice];
 }
 
-void HierarchicalFSMAgent::saveStaticTransitions(string filename) {
-//  std::ofstream ofs(filename);
-//  boost::archive::xml_oarchive oa(ofs);
-//  oa << BOOST_SERIALIZATION_NVP(numChoicesMap);
-//  oa << BOOST_SERIALIZATION_NVP(staticTransitions);
-}
-
-void HierarchicalFSMAgent::loadStaticTransitions(string filename) {
-//  std::ifstream ifs(filename);
-//  if (!ifs.good())
-//    return;
-//  boost::archive::xml_iarchive ia(ifs);
-//  ia >> BOOST_SERIALIZATION_NVP(numChoicesMap);
-//  ia >> BOOST_SERIALIZATION_NVP(staticTransitions);
-}

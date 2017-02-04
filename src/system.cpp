@@ -80,14 +80,15 @@ double System::simulate(Agent & agent, bool verbose)
 	return rewards;
 }
 
-double System::simulateFSM(HierarchicalFSMAgent & agent, bool verbose, bool useStaticTransition)
+double System::simulateHierarchicalAgent(HierarchicalAgent &agent, bool verbose,
+																				 const unordered_map<string, int> &params)
 {
   const int max_steps = 128;
 
-  agent.setEnv(&env_);
+  agent.setEnv_(&env_);
   agent.setMax_steps(max_steps);
   agent.setVerbose(verbose);
-  agent.setUseStaticTransition(useStaticTransition);
+  agent.setParams(params);
 
   env_.reset();
   agent.reset();

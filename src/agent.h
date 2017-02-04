@@ -20,13 +20,37 @@ enum Algorithm {
 	ALG_Sarsa,
 	ALG_QLearning,
 	ALG_SarsaLambda,
-	ALG_MaxQOL,
+	ALG_MaxQOP,
 	ALG_DynamicProgramming,
 	ALG_AStar,
 	ALG_UCT,
-  ALG_HierarchicalFSM
+  ALG_HierarchicalFSM,
+	ALG_MaxQ0,
+  ALG_MaxQQ
 };
 
+inline std::ostream& operator<<(std::ostream& out, const Algorithm value) {
+  static std::unordered_map<int, string> strings;
+
+  if (strings.size() == 0) {
+#define INSERT_ELEMENT(p) strings[p] = #p
+    INSERT_ELEMENT(ALG_None);
+    INSERT_ELEMENT(ALG_MonteCarlo);
+    INSERT_ELEMENT(ALG_Sarsa);
+    INSERT_ELEMENT(ALG_QLearning);
+    INSERT_ELEMENT(ALG_SarsaLambda);
+    INSERT_ELEMENT(ALG_MaxQOP);
+    INSERT_ELEMENT(ALG_DynamicProgramming);
+    INSERT_ELEMENT(ALG_AStar);
+    INSERT_ELEMENT(ALG_UCT);
+    INSERT_ELEMENT(ALG_HierarchicalFSM);
+    INSERT_ELEMENT(ALG_MaxQ0);
+    INSERT_ELEMENT(ALG_MaxQQ);
+#undef INSERT_ELEMENT
+  }
+
+  return out << strings[value];
+}
 
 class Agent {
 public:

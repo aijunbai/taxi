@@ -167,5 +167,5 @@ set fit brief errorvariables nocovariancevariables errorscaling prescale nowrap 
 set grid
 GNUTERM = "wxt"
 x = 0.0
-# set log x
+set log x
 plot \

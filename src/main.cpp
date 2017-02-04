@@ -17,6 +17,8 @@ using namespace std;
 #include "astar.h"
 #include "uct.h"
 #include "HierarchicalFSMAgent.h"
+#include "MaxQ0Agent.h"
+#include "MaxQQAgent.h"
 
 #include <sys/time.h>
 #include <thread>
@@ -29,11 +31,13 @@ Agent *CreatorAgent(Algorithm algorithm_t, bool train)
     case ALG_Sarsa: return new SarsaAgent(!train);
     case ALG_QLearning: return new QLearningAgent(!train);
     case ALG_SarsaLambda: return new SarsaLambdaAgent(!train);
-    case ALG_MaxQOL: return new MaxQOPAgent(!train);
+    case ALG_MaxQOP: return new MaxQOPAgent(!train);
     case ALG_DynamicProgramming: return new DPAgent(!train);
     case ALG_AStar: return new AStarAgent(!train);
     case ALG_UCT: return new UCTAgent(!train);
     case ALG_HierarchicalFSM: return new HierarchicalFSMAgent(!train);
+    case ALG_MaxQ0: return new MaxQ0Agent(!train);
+    case ALG_MaxQQ: return new MaxQQAgent(!train);
     default: return 0;
   }
 }
@@ -57,34 +61,36 @@ void call_from_thread(int tid,
                       int episodes,
                       int trials,
                       bool verbose,
-                      bool useStaticTransition) {
+                      bool leverageInternalTransitions) {
   for (int i = 0; i < trials; ++i) {
     if (i % num_threads == tid) {
-      cerr << "#trials #" << i << endl;
+      cerr << "#" << algorithm << " @ trials #" << i << endl;
 
       Agent *agent = CreatorAgent(algorithm, true);
 
       struct timeval start, end;
       double time_use;
-      gettimeofday(&start, NULL);
+      gettimeofday(&start, 0);
 
       for (int j = 0; j < episodes; ++j) {
         if (j % 10000 == 0) {
-          cerr << "#episodes #" << j << endl;
+          cerr << "#" << algorithm << " @ episodes #" << j << endl;
         }
 
         double r = 0.0;
-        if (algorithm == ALG_HierarchicalFSM) {
-          r = System().simulateFSM(*static_cast<HierarchicalFSMAgent *>(agent), verbose, useStaticTransition);
+        if (algorithm == ALG_HierarchicalFSM || algorithm == ALG_MaxQ0 || algorithm == ALG_MaxQQ) {
+          r = System().simulateHierarchicalAgent(*static_cast<HierarchicalAgent *>(agent), verbose,
+                                                 {{"leverageInternalTransitions", leverageInternalTransitions}});
         } else {
           r = System().simulate(*agent, verbose);
         }
+
         g_rewards_mutex.lock();
         (*rewards)[j] += r;
         g_rewards_mutex.unlock();
       }
 
-      gettimeofday(&end, NULL);
+      gettimeofday(&end, 0);
       time_use = 1000000.0 * (end.tv_sec - start.tv_sec) + end.tv_usec - start.tv_usec;
       time_use /= 1000.0;
 
@@ -105,7 +111,7 @@ int main(int argc, char **argv) {
   bool train = false;
   bool profile = false;
   bool verbose = false;
-  bool useStaticTransition = false;
+  bool leverageInternalTransitions = false;
   bool multithreaded = false;
   int trials = 4;
   int episodes = 10000;
@@ -127,7 +133,9 @@ int main(int argc, char **argv) {
         ("astar", "use A* algorithm")
         ("uct", "use UCT algorithm")
         ("hierarchicalfsm", "use hierarchical FSM algorithm")
-        ("hierarchicalfsmdet", "take advantage of static transitions for hierarchicalfsm")
+        ("hierarchicalfsmdet", "take advantage of internal transitions for hierarchicalfsm")
+        ("maxq0", "use MaxQ0 algorithm")
+        ("maxqq", "use MaxQQ algorithm")
         ("size", po::value<int>(&TaxiEnv::SIZE), "Problem size")
         ("trials", po::value<int>(&trials), "Training trials")
         ("episodes", po::value<int>(&episodes), "Training episodes")
@@ -147,7 +155,7 @@ int main(int argc, char **argv) {
     profile = vm.count("profile");
     verbose = vm.count("verbose");
     multithreaded = vm.count("multithreaded");
-    useStaticTransition = vm.count("hierarchicalfsmdet");
+    leverageInternalTransitions = vm.count("hierarchicalfsmdet");
 
     if (vm.count("monte-carlo")) {
       algorithm = ALG_MonteCarlo;
@@ -162,7 +170,7 @@ int main(int argc, char **argv) {
       algorithm = ALG_SarsaLambda;
     }
     else if (vm.count("maxq-ol")) {
-      algorithm = ALG_MaxQOL;
+      algorithm = ALG_MaxQOP;
     }
     else if (vm.count("dynamicprogramming")) {
       algorithm = ALG_DynamicProgramming;
@@ -175,6 +183,12 @@ int main(int argc, char **argv) {
     }
     else if (vm.count("hierarchicalfsm") || vm.count("hierarchicalfsmdet")) {
       algorithm = ALG_HierarchicalFSM;
+    }
+    else if (vm.count("maxq0")) {
+      algorithm = ALG_MaxQ0;
+    }
+    else if (vm.count("maxqq")) {
+      algorithm = ALG_MaxQQ;
     }
     else {
       cout << "Can not find an algorithm" << endl;
@@ -211,17 +225,18 @@ int main(int argc, char **argv) {
     for (int n = 0; n < N; ++n) {
       struct timeval start, end;
       double time_use;
-      gettimeofday(&start, NULL);
+      gettimeofday(&start, 0);
 
       double reward = 0.0;
-      if (algorithm == ALG_HierarchicalFSM) {
-        reward = System().simulateFSM(*static_cast<HierarchicalFSMAgent*>(agent), verbose, useStaticTransition);
+      if (algorithm == ALG_HierarchicalFSM || algorithm == ALG_MaxQ0 || algorithm == ALG_MaxQQ) {
+        reward = System().simulateHierarchicalAgent(*static_cast<HierarchicalAgent *>(agent), verbose,
+                                                    {{"leverageInternalTransitions", leverageInternalTransitions}});
       }
       else {
         reward = System().simulate(*agent, verbose);
       }
 
-      gettimeofday(&end, NULL);
+      gettimeofday(&end, 0);
       time_use = 1000000.0 * (end.tv_sec - start.tv_sec) + end.tv_usec - start.tv_usec;
       time_use /= 1000.0;
 
@@ -251,8 +266,9 @@ int main(int argc, char **argv) {
   else if (!train) { //test
     Agent *agent = CreatorAgent(algorithm, false);
 
-    if (algorithm == ALG_HierarchicalFSM) {
-      cout << "Reward: " << System().simulateFSM(*static_cast<HierarchicalFSMAgent*>(agent), verbose, useStaticTransition) << endl;
+    if (algorithm == ALG_HierarchicalFSM || algorithm == ALG_MaxQ0 || algorithm == ALG_MaxQQ) {
+      cout << "Reward: " << System().simulateHierarchicalAgent(*static_cast<HierarchicalAgent *>(agent), verbose,
+                                                               {{"leverageInternalTransitions", leverageInternalTransitions}}) << endl;
     }
     else {
       cout << "Reward: " << System().simulate(*agent, verbose) << endl;
@@ -283,7 +299,7 @@ int main(int argc, char **argv) {
           episodes,
           trials,
           verbose,
-          useStaticTransition);
+          leverageInternalTransitions);
     }
 
     //Join the threads with the main thread
@@ -297,7 +313,8 @@ int main(int argc, char **argv) {
     queue<double> Q;
     queue<double> cQ;
 
-    const int N = min(1000, episodes / 10);
+    const int win = 1000;
+    const int N = max(1, min(win, episodes / 10));
     for (int i = 0; i < N; ++i) {
       rewards[i] /= trials;
 

@@ -26,5 +26,4 @@ struct HashMap : std::unordered_map<K, V> {};
 template<typename K>
 struct HashSet : std::unordered_set<K> {};
 
-
 #endif /* QTABLE_H_ */

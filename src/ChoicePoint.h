@@ -66,7 +66,7 @@ private:
  */
 class Runner {
 public:
-  Runner(HierarchicalFSM *m, const vector<string> &parameters = {}) : m(m), parameters(parameters) {
+  Runner(HierarchicalFSM *m, const unordered_map<string, int> &parameters = {}) : m(m), parameters(parameters) {
     if (parameters.size())
       m->agent->PushStack(m->getName() + " (" + to_prettystring(parameters) + ")");
     else
@@ -79,7 +79,7 @@ public:
 
 private:
   HierarchicalFSM *m;
-  vector<string> parameters;
+  unordered_map<string, int> parameters;
 };
 
 class Actuator {

@@ -11,6 +11,8 @@
 #include "state.h"
 #include "HierarchicalFSMAgent.h"
 
+#define UNDETERMINISTIC_MACHINE 1
+
 using namespace std;
 
 namespace fsm {
@@ -52,7 +54,7 @@ public:
   string machineState() { return agent->getMachineState(); }
 
 private:
-  virtual void run(const vector<string> &parameters = {}) = 0;
+  virtual void run(unordered_map<string, int> parameters = {}) = 0;
 
 protected:
   /**
@@ -76,7 +78,7 @@ class Root: public HierarchicalFSM {
 public:
   Root(HierarchicalFSMAgent *p);
   virtual ~Root();
-  virtual void run(const vector<string> & parameters = {});
+  virtual void run(unordered_map<string, int> parameters = {});
 
 private:
   HierarchicalFSM *get;
@@ -90,7 +92,7 @@ class Primitive: public HierarchicalFSM {
 public:
   Primitive(HierarchicalFSMAgent *p, Action a, string name);
   virtual ~Primitive();
-  virtual void run(const vector<string> & parameters = {});
+  virtual void run(unordered_map<string, int> parameters = {});
 
 private:
   Action action;
@@ -100,46 +102,52 @@ class Get: public HierarchicalFSM {
 public:
   Get(HierarchicalFSMAgent *p);
   virtual ~Get();
-  virtual void run(const vector<string> & parameters = {});
+  virtual void run(unordered_map<string, int> parameters = {});
 
 private:
   HierarchicalFSM *pickup;
   HierarchicalFSM *nav;
 
+#if UNDETERMINISTIC_MACHINE
   ChoicePoint<HierarchicalFSM *> *choice;
+#endif
 };
 
 class Refuel: public HierarchicalFSM {
 public:
   Refuel(HierarchicalFSMAgent *p);
   virtual ~Refuel();
-  virtual void run(const vector<string> & parameters = {});
+  virtual void run(unordered_map<string, int> parameters = {});
 
 private:
   HierarchicalFSM *fillup;
   HierarchicalFSM *nav;
 
+#if UNDETERMINISTIC_MACHINE
   ChoicePoint<HierarchicalFSM *> *choice;
+#endif
 };
 
 class Put: public HierarchicalFSM {
 public:
   Put(HierarchicalFSMAgent *p);
   virtual ~Put();
-  virtual void run(const vector<string> &parameters = {});
+  virtual void run(unordered_map<string, int> parameters = {});
 
 private:
   HierarchicalFSM *putdown;
   HierarchicalFSM *nav;
 
+#if UNDETERMINISTIC_MACHINE
   ChoicePoint<HierarchicalFSM *> *choice;
+#endif
 };
 
 class Navigate: public HierarchicalFSM {
 public:
   Navigate(HierarchicalFSMAgent *p);
   virtual ~Navigate();
-  virtual void run(const vector<string> & parameters = {});
+  virtual void run(unordered_map<string, int> parameters = {});
 
 private:
   HierarchicalFSM *north;
@@ -147,8 +155,7 @@ private:
   HierarchicalFSM *east;
   HierarchicalFSM *west;
 
-  ChoicePoint<HierarchicalFSM *> *dir_choice;
-  ChoicePoint<int> *step_choice;
+  ChoicePoint<HierarchicalFSM *> *choice;
 };
 
 

@@ -17,3 +17,5 @@ clean:
 	rm -f maxq_op
 	rm -fr *.tbl *.log *.dot
 
+cleanall: clean
+	rm -fr data

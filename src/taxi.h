@@ -122,9 +122,10 @@ public:
 
   Position destination() { return terminal(state_.destination()); };
   Position passenger() { return terminal(state_.passenger()); };
-  Position terminal(int i) { return Model::ins().terminals().operator[](i); };
+  Position terminal(int i) { return Model::ins().terminals().at(i); };
 
-  size_t stateFeature(const State &state);
+  typedef tuple<int, int, bool, bool, bool> cond_t;
+  cond_t stateConditions(const State &state);
 
 private:
   Position get_random_position() {

@@ -44,7 +44,7 @@ Root::Root(HierarchicalFSMAgent *p): HierarchicalFSM(p, "$Root") {
   put = new Put(p);
   refuel = new Refuel(p);
 
-  choice = new ChoicePoint<HierarchicalFSM *>("@RootGet", {get, put, refuel});
+  choice = new ChoicePoint<HierarchicalFSM *>("@Root", {get, put, refuel});
 }
 
 Root::~Root() {
@@ -55,7 +55,7 @@ Root::~Root() {
   delete choice;
 }
 
-void Root::run(const vector<string> & parameters) {
+void Root::run(unordered_map<string, int> parameters) {
   while (running()) {
     MakeChoice<HierarchicalFSM *> c(this, choice);
     auto m = c();
@@ -63,6 +63,11 @@ void Root::run(const vector<string> & parameters) {
   }
 
   agent->Qupdate(state(), machineState(), 1, agent->steps);
+
+  if (agent->history.size() > 100) {
+    agent->showHistory();
+    exit(1);
+  }
 }
 
 Primitive::Primitive(HierarchicalFSMAgent *p, Action a, string name): HierarchicalFSM(p, "$" + name) {
@@ -72,7 +77,7 @@ Primitive::Primitive(HierarchicalFSMAgent *p, Action a, string name): Hierarchic
 Primitive::~Primitive() {
 }
 
-void Primitive::run(const vector<string> & parameters) {
+void Primitive::run(unordered_map<string, int> parameters) {
   Actuator(this, {to_prettystring(action)}).operator()(action);
 }
 
@@ -80,69 +85,116 @@ Get::Get(HierarchicalFSMAgent *p): HierarchicalFSM(p, "$Get") {
   pickup = new Primitive(p, Pickup, action_name(Pickup));
   nav = new Navigate(p);
 
+#if UNDETERMINISTIC_MACHINE
   choice = new ChoicePoint<HierarchicalFSM *>("@Get", {pickup, nav});
+#endif
 }
 
 Get::~Get() {
   delete pickup;
   delete nav;
 
+#if UNDETERMINISTIC_MACHINE
   delete choice;
+#endif
 }
 
-void Get::run(const vector<string> & parameters) {
-  if (running()) {
-    Runner(nav, {to_string(state().passenger())}).operator()();
-    if (running()) {
-      Runner(pickup).operator()();
+void Get::run(unordered_map<string, int> parameters) {
+#if UNDETERMINISTIC_MACHINE
+  while (running() && !state().loaded()) {
+    MakeChoice<HierarchicalFSM *> c(this, choice);
+    auto m = c();
+    if (m == nav) {
+      Runner(m, {{"target", state().passenger()}}).operator()();
+    }
+    else {
+      Runner(m).operator()();
     }
   }
+#else
+  if (running() && !state().loaded()) {
+    Runner(nav, {{"target", state().passenger()}}).operator()();
+    if (running()) Runner(pickup).operator()();
+  }
+#endif
 }
 
 Put::Put(HierarchicalFSMAgent *p): HierarchicalFSM(p, "$Put") {
   putdown = new Primitive(p, Putdown, action_name(Putdown));
   nav = new Navigate(p);
 
+#if UNDETERMINISTIC_MACHINE
   choice = new ChoicePoint<HierarchicalFSM *>("@Put", {putdown, nav});
+#endif
 }
 
 Put::~Put() {
   delete putdown;
   delete nav;
 
+#if UNDETERMINISTIC_MACHINE
   delete choice;
+#endif
 }
 
-void Put::run(const vector<string> & parameters) {
-  if (running()) {
-    Runner(nav, {to_string(state().destination())}).operator()();
-    if (running()) {
-      Runner(putdown).operator()();
+void Put::run(unordered_map<string, int> parameters) {
+  if (!state().loaded()) return;
+
+#if UNDETERMINISTIC_MACHINE
+  while (running() && !state().unloaded()) {
+    MakeChoice<HierarchicalFSM *> c(this, choice);
+    auto m = c();
+    if (m == nav) {
+      Runner(m, {{"target", state().destination()}}).operator()();
+    }
+    else {
+      Runner(m).operator()();
     }
   }
+#else
+  if (running() && !state().unloaded()) {
+    Runner(nav, {{"target", state().destination()}}).operator()();
+    if (running()) Runner(putdown).operator()();
+  }
+#endif
 }
 
 Refuel::Refuel(HierarchicalFSMAgent *p): HierarchicalFSM(p, "$Refuel") {
   fillup = new Primitive(p, Fillup, action_name(Fillup));
   nav = new Navigate(p);
 
+#if UNDETERMINISTIC_MACHINE
   choice = new ChoicePoint<HierarchicalFSM *>("@Refuel", {fillup, nav});
+#endif
 }
 
 Refuel::~Refuel() {
   delete fillup;
   delete nav;
 
+#if UNDETERMINISTIC_MACHINE
   delete choice;
+#endif
 }
 
-void Refuel::run(const vector<string> & parameters) {
-  if (running()) {
-    Runner(nav, {"F"}).operator()();
-    if (running()) {
-      Runner(fillup).operator()();
+void Refuel::run(unordered_map<string, int> parameters) {
+#if UNDETERMINISTIC_MACHINE
+  while (running() && !state().refueled()) {
+    MakeChoice<HierarchicalFSM *> c(this, choice);
+    auto m = c();
+    if (m == nav) {
+      Runner(m, {{"target", 4}}).operator()();
+    }
+    else {
+      Runner(m).operator()();
     }
   }
+#else
+  if (running() && !state().refueled()) {
+    Runner(nav, {{"target", 4}}).operator()();
+    if (running()) Runner(fillup).operator()();
+  }
+#endif
 }
 
 Navigate::Navigate(HierarchicalFSMAgent *p): HierarchicalFSM(p, "$Nav") {
@@ -151,8 +203,7 @@ Navigate::Navigate(HierarchicalFSMAgent *p): HierarchicalFSM(p, "$Nav") {
   east = new Primitive(p, East, action_name(East));
   west = new Primitive(p, West, action_name(West));
 
-  dir_choice = new ChoicePoint<HierarchicalFSM *>("@Dir", {north, south, east, west});
-  step_choice = new ChoicePoint<int>("@Step", {1, 2, 3, 4});
+  choice = new ChoicePoint<HierarchicalFSM *>("@Dir", {north, south, east, west});
 }
 
 Navigate::~Navigate() {
@@ -161,26 +212,26 @@ Navigate::~Navigate() {
   delete west;
   delete north;
 
-  delete dir_choice;
-  delete step_choice;
+  delete choice;
 }
 
-void Navigate::run(const vector<string> & parameters) {
-  char c = parameters[0][0];
-  Position target = c == 'F'? TaxiEnv::Model::ins().fuelPosition() : agent->env()->terminal(c - '0');
+void Navigate::run(unordered_map<string, int> parameters) {
+  int t = parameters["target"];
+  Position target;
+  if (t >= 0 && t <= 3) {
+    target = agent->env()->terminal(t);
+  }
+  else if (t == 4) {
+    target = TaxiEnv::Model::ins().fuelPosition();
+  }
+  else {
+    return;
+  }
 
-  while (running() && agent->env()->state().taxiPosition() != target) {
-    MakeChoice<HierarchicalFSM *> c(this, dir_choice);
+  while (running() && state().taxiPosition() != target) {
+    MakeChoice<HierarchicalFSM *> c(this, choice);
     auto m = c();
-
-    {
-      MakeChoice<int> c(this, step_choice);
-      auto n = c();
-
-      for (int i = 0; i < n && running() && agent->env()->state().taxiPosition() != target; ++i) {
-        Runner(m).operator()();
-      }
-    }
+    Runner(m).operator()();
   }
 }
 

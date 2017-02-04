@@ -187,12 +187,11 @@ void TaxiEnv::reset()
   state_ = State(taxi.x, taxi.y, passenger, destination, fuel);
 }
 
-size_t TaxiEnv::stateFeature(const State &state)
+TaxiEnv::cond_t TaxiEnv::stateConditions(const State &state)
 {
-  return hash<tuple<int, int, bool, bool, bool>>().operator()(
-      make_tuple(state.passenger(),
-                 state.destination(),
-                 state.taxiPosition() == terminal(state.passenger()),
-                 state.taxiPosition() == terminal(state.destination()),
-                 state.taxiPosition() == Model::ins().fuelPosition()));
+  return make_tuple(state.passenger(),
+                    state.destination(),
+                    state.passenger() == 4? 1: state.taxiPosition() == terminal(state.passenger()),
+                    state.taxiPosition() == terminal(state.destination()),
+                    state.taxiPosition() == Model::ins().fuelPosition());
 }
