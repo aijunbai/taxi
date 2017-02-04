@@ -63,11 +63,6 @@ void Root::run(unordered_map<string, int> parameters) {
   }
 
   agent->Qupdate(state(), machineState(), 1, agent->steps);
-
-  if (agent->history.size() > 100) {
-    agent->showHistory();
-    exit(1);
-  }
 }
 
 Primitive::Primitive(HierarchicalFSMAgent *p, Action a, string name): HierarchicalFSM(p, "$" + name) {
