@@ -8,8 +8,6 @@
 #ifndef POLICY_H_
 #define POLICY_H_
 
-#include "taxi.h"
-
 #include <vector>
 #include <map>
 #include <string>
@@ -26,19 +24,19 @@ enum PolicyType {
 class Policy {
 public:
 	virtual ~Policy() { }
-	virtual Action get_action(const std::vector<double> &distri) = 0;
+	virtual int get_action(const std::vector<double> &distri) = 0;
 
 	static std::string name(PolicyType type);
 };
 
 class RandomPolicy: public Policy {
 public:
-	virtual Action get_action(const std::vector<double> &distri);
+	virtual int get_action(const std::vector<double> &distri);
 };
 
 class GreedyPolicy: public Policy {
 public:
-	virtual Action get_action(const std::vector<double> &distri);
+	virtual int get_action(const std::vector<double> &distri);
 };
 
 class EpsilonGreedyPolicy: public GreedyPolicy {
@@ -46,7 +44,7 @@ private:
 	static double epsilon_;
 
 public:
-	virtual Action get_action(const std::vector<double> &distri);
+	virtual int get_action(const std::vector<double> &distri);
 };
 
 class PolicyFactory {

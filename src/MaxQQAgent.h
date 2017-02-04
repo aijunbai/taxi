@@ -12,6 +12,10 @@ class MaxQQAgent: public MaxQ0Agent {
 public:
   MaxQQAgent(const bool test);
 
+  string name() {
+    return "MaxQQ";
+  }
+
   virtual double run();
 
   list<State> MaxQQ(Task i, State s);

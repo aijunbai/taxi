@@ -7,8 +7,8 @@
 
 #include "tdagent.h"
 
-double TemporalDifferenceAgent::alpha = 0.15;
-double TemporalDifferenceAgent::gamma = 1.0 - 1.0e-6;
+double TemporalDifferenceAgent::alpha = 0.125;
+double TemporalDifferenceAgent::gamma = 1.0;
 
 double & TemporalDifferenceAgent::qvalue(const State & state, const int & action)
 {

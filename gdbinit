@@ -1,1 +1,1 @@
-r --size 5 --train --hierarchicalfsmdet --debug
+r --size 5 --train --maxq0 --debug

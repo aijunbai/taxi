@@ -13,10 +13,9 @@
 
 Action RLAgent::plan(const State & state) {
 	std::vector<double> distri(ActionSize);
-
-	for (int action = 0; action < ActionSize; ++action) {
-		distri[action] = qvalue(state, action);
+	for (int a = 0; a < ActionSize; ++a) {
+		distri[a] = qvalue(state, a);
 	}
 
-	return PolicyFactory::instance().CreatePolicy(test()? PT_Greedy: PT_EpsilonGreedy)->get_action(distri);
+	return (Action) PolicyFactory::instance().CreatePolicy(test()? PT_Greedy: PT_EpsilonGreedy)->get_action(distri);
 }

@@ -11,7 +11,7 @@
 #include "state.h"
 #include "HierarchicalFSMAgent.h"
 
-#define UNDETERMINISTIC_MACHINE 1
+#define UNDETERMINISTIC_MACHINE 0
 
 using namespace std;
 
@@ -155,7 +155,8 @@ private:
   HierarchicalFSM *east;
   HierarchicalFSM *west;
 
-  ChoicePoint<HierarchicalFSM *> *choice;
+  ChoicePoint<HierarchicalFSM *> *choice1;
+  ChoicePoint<int> *choice2;
 };
 
 

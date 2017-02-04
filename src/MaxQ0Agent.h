@@ -60,8 +60,10 @@ public:
 
   virtual double run();
 
+  void buildHierarchy(const State &s);
+
   int MaxQ0(Task i, State s);
-  pair<double, Task> EvaluateMaxNode(Task i, const State &s);
+  double V(Task i, const State &s);
   Task Pi(Task i, const State &s);
   double Q(Task i, const State &s, Task a);
 
@@ -72,9 +74,9 @@ public:
 
   unordered_map<int, unordered_map<State, double>> vtable_;
   unordered_map<int, unordered_map<State, unordered_map<int, double>>> ctable_;
-  unordered_map<int, unordered_set<int>> subtasks_;
+  unordered_map<int, vector<int>> subtasks_;
 
-  Task argmaxQ(Task i, const State &state);
+  Task argmaxQ(Task i, const State &s);
 };
 
 

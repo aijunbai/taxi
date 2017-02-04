@@ -19,9 +19,9 @@
 
 set -o nounset                              # Treat unset variables as an error
 
-VERSION="debug"
+VERSION="release"
 SIZE="5"
-EPISODES="10000000"
+EPISODES="1000000"
 PLT="plot.gnuplot"
 OPT=""
 
@@ -43,7 +43,7 @@ cp ../${PLT} plot.gnuplot
 cp ../${PLT} cplot.gnuplot
 cp ../plot.sh .
 
-for alg in hierarchicalfsm hierarchicalfsmdet maxq0 maxqq; do
+for alg in hierarchicalfsm hierarchicalfsmdet maxq0 maxqq qlearning; do
     time ../maxq_op $OPT --size $SIZE --trials $TRIALS --episodes $EPISODES \
         --train --multithreaded --$alg > ${alg}.out &
     echo "'${alg}.out' u 1:2 w l, \\" >> plot.gnuplot

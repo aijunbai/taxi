@@ -47,7 +47,7 @@ HierarchicalFSMAgent::~HierarchicalFSMAgent() {
 }
 
 void HierarchicalFSMAgent::step(Action a) {
-  auto state = env_->state();
+  auto state = env()->state();
   auto machineState = getMachineState();
 
   if (verbose) {
@@ -57,8 +57,7 @@ void HierarchicalFSMAgent::step(Action a) {
   }
 
   double reward = env()->step(a);
-  rewards += pow(gamma, steps) * reward;
-  steps += 1;
+  inc(reward);
 
   accumulatedRewards += accumulatedDiscount * reward;
   accumulatedDiscount *= gamma;
@@ -67,16 +66,16 @@ void HierarchicalFSMAgent::step(Action a) {
     cout << " | Reward: " << reward << endl;
   }
 
-  history.push_back(make_tuple(state, machineState, a, reward));
+//  history.push_back(make_tuple(state, machineState, a, reward));
 }
 
-void HierarchicalFSMAgent::showHistory()
-{
-  int t = 0;
-  for (auto &e : history) {
-    cout << "Step: " << t++ << " {{\n" << e << "\n}}\n" << endl;
-  }
-}
+//void HierarchicalFSMAgent::showHistory()
+//{
+//  int t = 0;
+//  for (auto &e : history) {
+//    cout << "Step: " << t++ << " {{\n" << e << "\n}}\n" << endl;
+//  }
+//}
 
 bool HierarchicalFSMAgent::running() {
   bool ret = !env()->state().terminated() && steps < max_steps;
@@ -93,7 +92,7 @@ void HierarchicalFSMAgent::reset() {
   lastChoiceTime = -1;
   stack.clear();
   lastMachineState.clear();
-  history.clear();
+//  history.clear();
 }
 
 void HierarchicalFSMAgent::PushStack(const string &s) {
@@ -112,35 +111,21 @@ double HierarchicalFSMAgent::run() {
 }
 
 int HierarchicalFSMAgent::selectChoice(const State &state, const string &machineState, int numChoices) {
-  if (!test() && drand48() < epsilon) {
-    return Action(rand() % numChoices);
+  std::vector<double> distri(numChoices);
+  for (int a = 0; a < numChoices; ++a) {
+    distri[a] = Q(state, machineState, a);
   }
-  else {
-    return argmaxQ(state, machineState, numChoices);
-  }
+
+  return PolicyFactory::instance().CreatePolicy(test()? PT_Greedy: PT_EpsilonGreedy)->get_action(distri);
 }
 
 int HierarchicalFSMAgent::argmaxQ(const State &state, const string &machineState, int numChoices) {
-  int bestAction = -1;
-  double bestValue = (double) INT_MIN;
-  int numTies = 0;
-
+  std::vector<double> distri(numChoices);
   for (int a = 0; a < numChoices; ++a) {
-    double value = Q(state, machineState, a);
-    if (value > bestValue) {
-      bestValue = value;
-      bestAction = a;
-    } else if (value == bestValue) {
-      numTies++;
-      if (rand() % (numTies + 1) == 0) {
-        bestValue = value;
-        bestAction = a;
-      }
-    }
+    distri[a] = Q(state, machineState, a);
   }
 
-  assert(bestAction != -1);
-  return bestAction;
+  return PolicyFactory::instance().CreatePolicy(PT_Greedy)->get_action(distri);
 }
 
 double HierarchicalFSMAgent::V(const State &state, const string &machineState, int numChoices)

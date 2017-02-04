@@ -12,10 +12,9 @@ list<State> MaxQQAgent::MaxQQ(Task i, State s)
 {
   if (IsPrimitive(i)) {
     Action action = TaskToAction(i);
-    double reward = env_->step(action);
+    double reward = env()->step(action);
     vtable_[i][s] = (1.0 - alpha) * vtable_[i][s] + alpha * reward;
-    rewards += reward;
-    steps += 1;
+    inc(reward);
     return {s};
   }
   else {
@@ -40,7 +39,7 @@ list<State> MaxQQAgent::MaxQQ(Task i, State s)
 }
 
 double MaxQQAgent::run() {
-  State state = env_->state();
+  State state = env()->state();
   MaxQQ(Root_T, state);
   return rewards;
 }

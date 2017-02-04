@@ -18,12 +18,12 @@ public:
 
   }
 
+  static const double alpha;
+  static const double gamma;
+
   TaxiEnv *env() { return env_; }
 
   TaxiEnv *env_;
-  double epsilon;
-  double alpha;
-  double gamma;
   bool verbose;
   int rewards;
   int steps;
@@ -38,8 +38,6 @@ public:
 
   void setVerbose(bool verbose);
 
-  TaxiEnv *getEnv_() const;
-
   void setEnv_(TaxiEnv *env_);
 
   virtual void reset();
@@ -47,6 +45,11 @@ public:
   virtual double run() = 0;
 
   virtual string name() = 0;
+
+  void inc(double reward) {
+    rewards += pow(gamma, steps) * reward;
+    steps += 1;
+  }
 
   // not used
   virtual Action plan(const State & state) { return Null; }

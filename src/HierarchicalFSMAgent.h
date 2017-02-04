@@ -37,11 +37,11 @@ public:
 
   bool running();
 
-  void showHistory();
+//  void showHistory();
 
 public:
   vector<string> stack;
-  vector<tuple<State, string, Action, double>> history;
+//  vector<tuple<State, string, Action, double>> history;
 
   State lastState;
   int lastChoice;
@@ -51,7 +51,8 @@ public:
 
 public:
   bool leverageInternalTransitions() {
-    return parameters["leverageInternalTransitions"];
+    static bool ret = parameters["leverageInternalTransitions"];
+    return ret;
   }
 
   double accumulatedRewards;

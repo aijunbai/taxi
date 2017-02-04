@@ -25,9 +25,8 @@ void QLearningAgent::terminate(const State & state, int action, double reward)
 int QLearningAgent::greedy(const State & state)
 {
 	std::vector<double> distri(ActionSize);
-
-	for (int action = 0; action < ActionSize; ++action) {
-		distri[action] = qvalue(state, action);
+	for (int a = 0; a < ActionSize; ++a) {
+		distri[a] = qvalue(state, a);
 	}
 
 	return PolicyFactory::instance().CreatePolicy(PT_Greedy)->get_action(distri);

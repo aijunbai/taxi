@@ -4,19 +4,14 @@
 
 #include "HierarchicalAgent.h"
 
+const double HierarchicalAgent::alpha = 0.125;
+const double HierarchicalAgent::gamma = 1.0;
+
 void HierarchicalAgent::setEnv_(TaxiEnv *env_) {
   HierarchicalAgent::env_ = env_;
 }
 
-TaxiEnv *HierarchicalAgent::getEnv_() const {
-  return env_;
-}
-
 void HierarchicalAgent::reset() {
-  epsilon = 0.01;
-  alpha = 0.125;
-  gamma = 1.0;
-
   rewards = 0.0;
   steps = 0;
 }
