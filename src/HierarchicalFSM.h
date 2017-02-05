@@ -155,8 +155,7 @@ private:
   HierarchicalFSM *east;
   HierarchicalFSM *west;
 
-  ChoicePoint<HierarchicalFSM *> *choice1;
-  ChoicePoint<int> *choice2;
+  ChoicePoint<HierarchicalFSM *> *choice;
 };
 
 

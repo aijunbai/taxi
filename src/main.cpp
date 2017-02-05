@@ -51,7 +51,6 @@ void set_random_seed(int seed)
 mutex g_rewards_mutex;
 mutex g_time_mutex;
 mutex g_delete_mutex;
-mutex g_output_mutex;
 
 void call_from_thread(int tid,
                       int num_threads,
@@ -65,9 +64,7 @@ void call_from_thread(int tid,
                       bool leverageInternalTransitions) {
   for (int i = 0; i < trials; ++i) {
     if (i % num_threads == tid) {
-      g_output_mutex.lock();
-      cout << "#" << algorithm << " @ trials #" << i << endl;
-      g_output_mutex.unlock();
+      cerr << "#" << algorithm << " @ trials #" << i << endl;
 
       Agent *agent = CreatorAgent(algorithm, true);
 
@@ -76,9 +73,9 @@ void call_from_thread(int tid,
       gettimeofday(&start, 0);
 
       for (int j = 0; j < episodes; ++j) {
-        g_output_mutex.lock();
-        cout << "#" << algorithm << " @ episodes #" << j << endl;
-        g_output_mutex.unlock();
+        if (j % 10000 == 0) {
+          cerr << "#" << algorithm << " @ episodes #" << j << endl;
+        }
 
         double r = 0.0;
         if (algorithm == ALG_HierarchicalFSM || algorithm == ALG_MaxQ0 || algorithm == ALG_MaxQQ) {

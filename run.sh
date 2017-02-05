@@ -21,12 +21,24 @@ set -o nounset                              # Treat unset variables as an error
 
 VERSION="release"
 SIZE="5"
-EPISODES="1000000"
+EPISODES="10000000"
 PLT="plot.gnuplot"
 OPT=""
 
+declare -a ALGS=(
+        "hierarchicalfsm" 
+        "hierarchicalfsmdet" 
+        "maxq0" 
+        "maxqq" 
+        "qlearning" 
+    )
+
 NPROC="`nproc`"
-TRIALS="`expr $NPROC / 4`"
+TRIALS="`expr $NPROC / ${#ALGS[@]}`"
+
+if [ "$TRIALS" -le "1" ]; then
+    TRIALS="1"
+fi
 
 if [ $VERSION = "debug" ]; then
     OPT="--debug $OPT"
@@ -43,7 +55,7 @@ cp ../${PLT} plot.gnuplot
 cp ../${PLT} cplot.gnuplot
 cp ../plot.sh .
 
-for alg in hierarchicalfsm hierarchicalfsmdet maxq0 maxqq qlearning; do
+for alg in "${ALGS[@]}"; do
     time ../maxq_op $OPT --size $SIZE --trials $TRIALS --episodes $EPISODES \
         --train --multithreaded --$alg > ${alg}.out &
     echo "'${alg}.out' u 1:2 w l, \\" >> plot.gnuplot

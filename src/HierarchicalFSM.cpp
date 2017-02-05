@@ -198,8 +198,7 @@ Navigate::Navigate(HierarchicalFSMAgent *p): HierarchicalFSM(p, "$Nav") {
   east = new Primitive(p, East, action_name(East));
   west = new Primitive(p, West, action_name(West));
 
-  choice1 = new ChoicePoint<HierarchicalFSM *>("@Dir", {north, south, east, west});
-  choice2 = new ChoicePoint<int>("@Step", {1, 2, 3, 4});
+  choice = new ChoicePoint<HierarchicalFSM *>("@Dir", {north, south, east, west});
 }
 
 Navigate::~Navigate() {
@@ -208,7 +207,7 @@ Navigate::~Navigate() {
   delete west;
   delete north;
 
-  delete choice1;
+  delete choice;
 }
 
 void Navigate::run(unordered_map<string, int> parameters) {
@@ -225,13 +224,9 @@ void Navigate::run(unordered_map<string, int> parameters) {
   }
 
   while (running() && state().taxiPosition() != target) {
-    MakeChoice<HierarchicalFSM *> c1(this, choice1);
-    auto m = c1();
-    MakeChoice<int> c2(this, choice2);
-    auto n = c2();
-    for (int i = 0; i < n && running() && state().taxiPosition() != target; ++i) {
-      Runner(m).operator()();
-    }
+    MakeChoice<HierarchicalFSM *> c(this, choice);
+    auto m = c();
+    Runner(m).operator()();
   }
 }
 
