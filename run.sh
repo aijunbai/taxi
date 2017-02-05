@@ -21,7 +21,7 @@ set -o nounset                              # Treat unset variables as an error
 
 VERSION="release"
 SIZE="5"
-EPISODES="10000000"
+EPISODES="1000000"
 PLT="plot.gnuplot"
 OPT=""
 

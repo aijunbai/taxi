@@ -40,6 +40,7 @@ list<State> MaxQQAgent::MaxQQ(Task i, State s)
 
 double MaxQQAgent::run() {
   State state = env()->state();
+  buildHierarchy(state);
   MaxQQ(Root_T, state);
   return rewards;
 }

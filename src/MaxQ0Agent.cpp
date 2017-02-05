@@ -42,6 +42,7 @@ void MaxQ0Agent::buildHierarchy(const State &s)
 
 double MaxQ0Agent::run() {
   State state = env()->state();
+  buildHierarchy(state);
   MaxQ0(Root_T, state);
   return rewards;
 }
