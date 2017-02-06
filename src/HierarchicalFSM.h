@@ -85,7 +85,8 @@ private:
   HierarchicalFSM *put;
   HierarchicalFSM *refuel;
 
-  ChoicePoint<HierarchicalFSM *> *choice;
+  ChoicePoint<HierarchicalFSM *> *choice1;
+  ChoicePoint<HierarchicalFSM *> *choice2;
 };
 
 class Primitive: public HierarchicalFSM {

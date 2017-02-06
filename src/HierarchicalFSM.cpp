@@ -44,7 +44,8 @@ Root::Root(HierarchicalFSMAgent *p): HierarchicalFSM(p, "$Root") {
   put = new Put(p);
   refuel = new Refuel(p);
 
-  choice = new ChoicePoint<HierarchicalFSM *>("@Root", {get, put, refuel});
+  choice1 = new ChoicePoint<HierarchicalFSM *>("@Root", {get, refuel});
+  choice2 = new ChoicePoint<HierarchicalFSM *>("@Root", {put, refuel});
 }
 
 Root::~Root() {
@@ -52,12 +53,19 @@ Root::~Root() {
   delete put;
   delete refuel;
 
-  delete choice;
+  delete choice1;
+  delete choice2;
 }
 
 void Root::run(unordered_map<string, int> parameters) {
+  while (running() && !state().loaded()) {
+    MakeChoice<HierarchicalFSM *> c(this, choice1);
+    auto m = c();
+    Runner(m).operator()();
+  }
+
   while (running()) {
-    MakeChoice<HierarchicalFSM *> c(this, choice);
+    MakeChoice<HierarchicalFSM *> c(this, choice2);
     auto m = c();
     Runner(m).operator()();
   }

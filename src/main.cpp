@@ -342,7 +342,7 @@ int main(int argc, char **argv) {
       cQ.pop();
       cQ.push(crewards[i]);
 
-      if (i % (max(1, episodes / 100)) == 0) {
+      if ((i - N) % (max(1, episodes / 100)) == 0 || i == episodes - 1) {
         cout << i << " " << avg << " " << cavg << endl;
       }
     }

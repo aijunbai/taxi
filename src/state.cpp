@@ -72,7 +72,7 @@ std::string State::str() const
 
 bool State::terminated() const
 {
-	return passenger() == destination() || fuel() <= 0;
+	return unloaded() || fuel() <= 0;
 }
 
 ostream &operator<<(ostream &os, const State &o) {

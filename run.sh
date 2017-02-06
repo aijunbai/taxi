@@ -21,7 +21,7 @@ set -o nounset                              # Treat unset variables as an error
 
 VERSION="release"
 SIZE="5"
-EPISODES="1000000"
+EPISODES="5000000"
 PLT="plot.gnuplot"
 OPT=""
 
@@ -29,8 +29,8 @@ declare -a ALGS=(
         "hierarchicalfsm" 
         "hierarchicalfsmdet" 
         "maxq0" 
-        "maxqq" 
-        "qlearning" 
+        #"maxqq" 
+        #"qlearning" 
     )
 
 NPROC="`nproc`"
