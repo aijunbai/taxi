@@ -50,9 +50,7 @@ void DPAgent::ValueIteration()
 
 		cerr << "#value iteration @ " << episodes++ << " " << max_error << endl;
 
-		if (max_error < 0.01) {
-			break;
-		}
+		if (max_error < 0.01) break;
 	} while (1);
 }
 

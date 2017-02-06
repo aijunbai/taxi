@@ -66,35 +66,39 @@ bool State::terminated() const
 }
 
 ostream &operator<<(ostream &os, const State &o) {
-  int n = 5; //TaxiEnv::SIZE;
   char t[] = {'Y', 'R', 'B', 'G', 't'};
-
-  os << "\n";
-  os << std::make_tuple(o.x(), o.y(), t[o.passenger()], t[o.destination()]) << "\n";
-
-  vector<pair<int, int>> pos = {{0, 0}, {0, n - 1}, {n - 2, 0}, {n - 1, n - 1}};
-  if (o.passenger() < 4) t[o.passenger()] = 'p';
-
-  for (int i = 0; i < n; ++i) {
-    for (int j = 0; j < n; ++j) {
-      int x = j;
-      int y = 4 - i;
-
-      if (o.x() == x && o.y() == y) {
-        os << ((o.passenger() == 4)? '@': '#');
-      }
-      else if (find(pos.begin(), pos.end(), make_pair(x, y)) != pos.end()) {
-        int idx = find(pos.begin(), pos.end(),  make_pair(x, y)) - pos.begin();
-        os << t[idx];
-      }
-      else {
-        os << '.';
-      }
-    }
-    os << '\n';
-  }
-
+  os << make_tuple(o.x(), o.y(), t[o.passenger()], t[o.destination()]);
   return os;
+//
+//  int n = 5; //TaxiEnv::SIZE;
+//  char t[] = {'Y', 'R', 'B', 'G', 't'};
+//
+//  os << "\n";
+//  os << std::make_tuple(o.x(), o.y(), t[o.passenger()], t[o.destination()]) << "\n";
+//
+//  vector<pair<int, int>> pos = {{0, 0}, {0, n - 1}, {n - 2, 0}, {n - 1, n - 1}};
+//  if (o.passenger() < 4) t[o.passenger()] = 'p';
+//
+//  for (int i = 0; i < n; ++i) {
+//    for (int j = 0; j < n; ++j) {
+//      int x = j;
+//      int y = 4 - i;
+//
+//      if (o.x() == x && o.y() == y) {
+//        os << ((o.passenger() == 4)? '@': '#');
+//      }
+//      else if (find(pos.begin(), pos.end(), make_pair(x, y)) != pos.end()) {
+//        int idx = find(pos.begin(), pos.end(),  make_pair(x, y)) - pos.begin();
+//        os << t[idx];
+//      }
+//      else {
+//        os << '.';
+//      }
+//    }
+//    os << '\n';
+//  }
+//
+//  return os;
 }
 
 bool State::unloaded() const {

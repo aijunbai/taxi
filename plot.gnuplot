@@ -168,4 +168,3 @@ set grid
 GNUTERM = "wxt"
 x = 0.0
 set log x
-plot \
