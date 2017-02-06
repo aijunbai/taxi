@@ -87,7 +87,7 @@ void HierarchicalFSMAgent::reset() {
 
   accumulatedRewards = 0.0;
   accumulatedDiscount = 1.0;
-  lastState = {0, 0, 0, 0, 0};
+  lastState = {0, 0, 0, 0};
   lastChoice = 0;
   lastChoiceTime = -1;
   stack.clear();

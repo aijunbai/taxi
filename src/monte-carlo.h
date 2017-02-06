@@ -30,8 +30,8 @@ public:
 	virtual void terminate(const State & state, int action, double reward);
 
 private:
-	std::list<std::pair<std::pair<State, int>, double> > history_;
-	HashMap<State, HashMap<int, boost::tuples::tuple<double, u_int64_t>>> monte_carlo_;
+	list<pair<pair<State, int>, double> > history_;
+	HashMap<State, HashMap<int, tuple<double, u_int64_t>>> monte_carlo_;
 };
 
 #endif /* MONTE_CARLO_H_ */

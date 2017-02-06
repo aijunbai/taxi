@@ -17,14 +17,12 @@ public:
     Root_T = 0,
 
     Get_T,
-    Refuel_T,
     Put_T,
 
     NavR_T,
     NavY_T,
     NavB_T,
     NavG_T,
-    NavF_T,
 
     Pickup_T,
     Putdown_T,
@@ -32,7 +30,6 @@ public:
     South_T,
     East_T,
     West_T,
-    Fillup_T,
 
     TaskSize
   };
@@ -45,7 +42,6 @@ public:
       case South_T: return South;
       case East_T: return East;
       case West_T: return West;
-      case Fillup_T: return Fillup;
       default: assert(0); return Null;
     }
   }
@@ -65,7 +61,9 @@ public:
   int MaxQ0(Task i, State s);
   double V(Task i, const State &s);
   Task Pi(Task i, const State &s);
+
   double Q(Task i, const State &s, Task a);
+  Task argmaxQ(Task i, const State &s);
 
   bool IsActiveState(Task task, const State & state);
   bool IsTerminalState(Task task, const State & state);
@@ -75,8 +73,6 @@ public:
   unordered_map<int, unordered_map<State, double>> vtable_;
   unordered_map<int, unordered_map<State, unordered_map<int, double>>> ctable_;
   unordered_map<int, vector<int>> subtasks_;
-
-  Task argmaxQ(Task i, const State &s);
 };
 
 

@@ -8,8 +8,8 @@
 #include "state.h"
 #include "taxi.h"
 
-State::State(int a, int b, int c, int d, int e):
-    tuple<int, int, int, int, int>(a, b, c, d, e)
+State::State(int a, int b, int c, int d):
+    tuple<int, int, int, int>(a, b, c, d)
 {
 
 }
@@ -34,11 +34,6 @@ int State::destination() const
 	return get<3>(*this);
 }
 
-int State::fuel() const
-{
-  return get<4>(*this);
-};
-
 int& State::x()
 {
 	return get<0>(*this);
@@ -58,11 +53,6 @@ int& State::destination()
 	return get<3>(*this);
 }
 
-int& State::fuel()
-{
-  return get<4>(*this);
-};
-
 std::string State::str() const
 {
 	std::stringstream ss;
@@ -72,7 +62,7 @@ std::string State::str() const
 
 bool State::terminated() const
 {
-	return unloaded() || fuel() <= 0;
+	return unloaded();
 }
 
 ostream &operator<<(ostream &os, const State &o) {
@@ -80,7 +70,7 @@ ostream &operator<<(ostream &os, const State &o) {
   char t[] = {'Y', 'R', 'B', 'G', 't'};
 
   os << "\n";
-  os << std::make_tuple(o.x(), o.y(), t[o.passenger()], t[o.destination()], o.fuel()) << "\n";
+  os << std::make_tuple(o.x(), o.y(), t[o.passenger()], t[o.destination()]) << "\n";
 
   vector<pair<int, int>> pos = {{0, 0}, {0, n - 1}, {n - 2, 0}, {n - 1, n - 1}};
   if (o.passenger() < 4) t[o.passenger()] = 'p';
@@ -96,9 +86,6 @@ ostream &operator<<(ostream &os, const State &o) {
       else if (find(pos.begin(), pos.end(), make_pair(x, y)) != pos.end()) {
         int idx = find(pos.begin(), pos.end(),  make_pair(x, y)) - pos.begin();
         os << t[idx];
-      }
-      else if (x == 2 && y == 1) {
-        os << 'F';
       }
       else {
         os << '.';
@@ -116,10 +103,6 @@ bool State::unloaded() const {
 
 bool State::loaded() const {
   return passenger() == TaxiEnv::Model::ins().inTaxi();
-}
-
-bool State::refueled() const {
-  return taxiPosition() == TaxiEnv::Model::ins().fuelPosition() && fuel() == State::MAX_FUEL;
 }
 
 Position State::taxiPosition() const { return Position(x(), y()); }

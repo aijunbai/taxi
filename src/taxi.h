@@ -39,7 +39,6 @@ public:
       terminals_.push_back(Position(SIZE - 1, SIZE - 1));
 
       inTaxi_ = terminals_.size();
-      fuelPosition_ = Position(2, 1);
 
       for (int x = 0; x < SIZE; ++x) {
         for (int y = 0; y < SIZE; ++y) {
@@ -88,17 +87,11 @@ public:
 
   private:
     std::vector<Position> terminals_;
-    Position fuelPosition_;
     int inTaxi_;
 
   public:
     int inTaxi() const {
       return inTaxi_;
-    }
-
-  public:
-    const Position &fuelPosition() const {
-      return fuelPosition_;
     }
 
   public:
@@ -124,7 +117,7 @@ public:
   Position passenger() { return terminal(state_.passenger()); };
   Position terminal(int i) { return Model::ins().terminals().at(i); };
 
-  typedef tuple<int, int, bool, bool, bool> cond_t;
+  typedef tuple<int, int, bool, bool> cond_t;
   cond_t stateConditions(const State &state);
 
 private:
@@ -134,10 +127,6 @@ private:
 
   int get_random_stop() {
     return rand() % Model::ins().terminals().size();
-  }
-
-  int get_random_fuel() {
-    return State::MIN_FUEL + rand() % (State::MAX_FUEL - State::MIN_FUEL + 1);
   }
 
 private:

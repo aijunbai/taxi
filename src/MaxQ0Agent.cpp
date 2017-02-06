@@ -8,17 +8,15 @@
 MaxQ0Agent::MaxQ0Agent(const bool test): HierarchicalAgent(test) {
   reset();
 
-  subtasks_[Root_T] = {Get_T, Put_T, Refuel_T};
+  subtasks_[Root_T] = {Get_T, Put_T};
 
   subtasks_[Get_T] = {Pickup_T, NavB_T, NavG_T, NavR_T, NavY_T}; //to be redefined based on input state
   subtasks_[Put_T] = {Putdown_T, NavB_T, NavG_T, NavR_T, NavY_T};  //to be redefined based on input state
-  subtasks_[Refuel_T] = {Fillup_T, NavF_T};
 
   subtasks_[NavB_T] = {North_T, South_T, East_T, West_T};
   subtasks_[NavG_T] = {North_T, South_T, East_T, West_T};
   subtasks_[NavR_T] = {North_T, South_T, East_T, West_T};
   subtasks_[NavY_T] = {North_T, South_T, East_T, West_T};
-  subtasks_[NavF_T] = {North_T, South_T, East_T, West_T};
 }
 
 void MaxQ0Agent::buildHierarchy(const State &s)
@@ -94,7 +92,8 @@ int MaxQ0Agent::MaxQ0(Task i, State s)
       Task a = Pi(i, s);
       int N = MaxQ0(a, s);
       State s_prime = env()->state();
-      ctable_[i][s][a] = (1 - alpha) * ctable_[i][s][a] + alpha * pow(gamma, N) * V(i, s_prime);
+      double r = pow(gamma, N) * V(i, s_prime);
+      ctable_[i][s][a] = (1 - alpha) * ctable_[i][s][a] + alpha * r;
       count += N;
       s = s_prime;
     }
@@ -119,8 +118,7 @@ bool MaxQ0Agent::IsPrimitive(Task task)
          task == North_T ||
          task == South_T ||
          task == West_T ||
-         task == East_T ||
-         task == Fillup_T;
+         task == East_T;
 }
 
 bool MaxQ0Agent::IsActiveState(Task task, const State & state)
@@ -130,15 +128,12 @@ bool MaxQ0Agent::IsActiveState(Task task, const State & state)
 
     case Get_T: return !state.loaded();
     case Put_T: return state.loaded();
-    case Refuel_T: return !state.refueled();
 
     case NavR_T:
     case NavY_T:
     case NavG_T:
-    case NavF_T:
     case NavB_T: return true;
 
-    case Fillup_T:
     case Pickup_T:
     case Putdown_T:
     case North_T:
@@ -159,13 +154,11 @@ bool MaxQ0Agent::IsTerminalState(Task task, const State & state)
 
     case Get_T: return state.loaded();
     case Put_T: return state.unloaded();
-    case Refuel_T: return state.refueled();
 
     case NavR_T: return state.taxiPosition() == TaxiEnv::Model::ins().terminals()[1];
     case NavY_T: return state.taxiPosition() == TaxiEnv::Model::ins().terminals()[0];
     case NavG_T: return state.taxiPosition() == TaxiEnv::Model::ins().terminals()[3];
     case NavB_T: return state.taxiPosition() == TaxiEnv::Model::ins().terminals()[2];
-    case NavF_T: return state.taxiPosition() == TaxiEnv::Model::ins().fuelPosition();
 
     case Pickup_T:
     case Putdown_T:

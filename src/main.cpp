@@ -24,6 +24,8 @@ using namespace std;
 #include <thread>
 #include <mutex>
 
+#define MOVING_AVERAGE 1
+
 Agent *CreatorAgent(Algorithm algorithm_t, bool train)
 {
   switch (algorithm_t) {
@@ -73,7 +75,7 @@ void call_from_thread(int tid,
       gettimeofday(&start, 0);
 
       for (int j = 0; j < episodes; ++j) {
-        if (j % 10000 == 0) {
+        if (j % (episodes / 10) == 0) {
           cerr << "#" << algorithm << " @ episodes #" << j << endl;
         }
 
@@ -133,7 +135,7 @@ int main(int argc, char **argv) {
         ("astar", "use A* algorithm")
         ("uct", "use UCT algorithm")
         ("hierarchicalfsm", "use hierarchical FSM algorithm")
-        ("hierarchicalfsmdet", "take advantage of internal transitions for hierarchicalfsm")
+        ("hierarchicalfsmint", "take advantage of internal transitions for hierarchicalfsm")
         ("maxq0", "use MaxQ0 algorithm")
         ("maxqq", "use MaxQQ algorithm")
         ("size", po::value<int>(&TaxiEnv::SIZE), "Problem size")
@@ -155,7 +157,7 @@ int main(int argc, char **argv) {
     profile = vm.count("profile");
     verbose = vm.count("verbose");
     multithreaded = vm.count("multithreaded");
-    leverageInternalTransitions = vm.count("hierarchicalfsmdet");
+    leverageInternalTransitions = vm.count("hierarchicalfsmint");
 
     if (vm.count("monte-carlo")) {
       algorithm = ALG_MonteCarlo;
@@ -181,7 +183,7 @@ int main(int argc, char **argv) {
     else if (vm.count("uct")) {
       algorithm = ALG_UCT;
     }
-    else if (vm.count("hierarchicalfsm") || vm.count("hierarchicalfsmdet")) {
+    else if (vm.count("hierarchicalfsm") || vm.count("hierarchicalfsmint")) {
       algorithm = ALG_HierarchicalFSM;
     }
     else if (vm.count("maxq0")) {
@@ -212,7 +214,9 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  PRINT_VALUE(ActionSize); // initialize cache
+  // initialize cache
+  PRINT_VALUE(ActionSize);
+  PRINT_VALUE(ALG_None);
 
   if (profile) {
     double avg_reward = 0.0, avg_time = 0.0;
@@ -255,7 +259,6 @@ int main(int argc, char **argv) {
     double sum_rewards = 0.0, sum_time = 0.0;
     for (int i = 0; i < N; ++i) {
       sum_rewards += (rewards[i] - avg_reward) * (rewards[i] - avg_reward);
-
       sum_time += (time[i] - avg_time) * (time[i] - avg_time);
     }
 
@@ -307,22 +310,22 @@ int main(int argc, char **argv) {
       t[i].join();
     }
 
+    for (int i = 0; i < episodes; ++i) {
+      rewards[i] /= trials;
+
+      if (i == 0) crewards[i] = rewards[i];
+      else crewards[i] = crewards[i - 1] + rewards[i];
+    }
+
+#if MOVING_AVERAGE
     double avg = 0.0;
     double cavg = 0.0;
 
     queue<double> Q;
     queue<double> cQ;
 
-    const int win = 1000;
-    const int N = max(1, min(win, episodes / 10));
-    for (int i = 0; i < N; ++i) {
-      rewards[i] /= trials;
-
-      if (i == 0)
-        crewards[i] = rewards[i];
-      else
-        crewards[i] = crewards[i - 1] + rewards[i];
-
+    const int win = 100;
+    for (int i = 0; i < win; ++i) {
       avg = (avg * Q.size() + rewards[i]) / (Q.size() + 1);
       Q.push(rewards[i]);
 
@@ -330,10 +333,7 @@ int main(int argc, char **argv) {
       cQ.push(crewards[i]);
     }
 
-    for (int i = N; i < episodes; ++i) {
-      rewards[i] /= trials;
-      crewards[i] = crewards[i - 1] + rewards[i];
-
+    for (int i = win; i < episodes; ++i) {
       avg = (avg * Q.size() - Q.front() + rewards[i]) / Q.size();
       Q.pop();
       Q.push(rewards[i]);
@@ -342,11 +342,15 @@ int main(int argc, char **argv) {
       cQ.pop();
       cQ.push(crewards[i]);
 
-      if ((i - N) % (max(1, episodes / 100)) == 0 || i == episodes - 1) {
-        cout << i << " " << avg << " " << cavg << endl;
-      }
+      cout << i << " " << avg << " " << cavg << endl;
     }
+#else
+    for (int i = 0; i < episodes; ++i) {
+      cout << i << " " << rewards[i] << " " << crewards[i] << endl;
+    }
+#endif
 
+    avg_time /= time.size();
     double sum_time = 0.0;
     for (int i = 0; i < trials; ++i) {
       sum_time += (time[i] - avg_time) * (time[i] - avg_time);

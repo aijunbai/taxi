@@ -49,6 +49,7 @@ inline std::ostream& operator<<(std::ostream& out, const Algorithm value) {
 #undef INSERT_ELEMENT
   }
 
+  assert(strings.count(value));
   return out << strings[value];
 }
 

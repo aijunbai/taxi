@@ -11,8 +11,6 @@
 #include "state.h"
 #include "HierarchicalFSMAgent.h"
 
-#define UNDETERMINISTIC_MACHINE 0
-
 using namespace std;
 
 namespace fsm {
@@ -83,10 +81,7 @@ public:
 private:
   HierarchicalFSM *get;
   HierarchicalFSM *put;
-  HierarchicalFSM *refuel;
 
-  ChoicePoint<HierarchicalFSM *> *choice1;
-  ChoicePoint<HierarchicalFSM *> *choice2;
 };
 
 class Primitive: public HierarchicalFSM {
@@ -107,21 +102,6 @@ public:
 
 private:
   HierarchicalFSM *pickup;
-  HierarchicalFSM *nav;
-
-#if UNDETERMINISTIC_MACHINE
-  ChoicePoint<HierarchicalFSM *> *choice;
-#endif
-};
-
-class Refuel: public HierarchicalFSM {
-public:
-  Refuel(HierarchicalFSMAgent *p);
-  virtual ~Refuel();
-  virtual void run(unordered_map<string, int> parameters = {});
-
-private:
-  HierarchicalFSM *fillup;
   HierarchicalFSM *nav;
 
 #if UNDETERMINISTIC_MACHINE

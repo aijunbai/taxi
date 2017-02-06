@@ -49,7 +49,7 @@ vector<pair<State, double> > TaxiEnv::Transition(const State & state, Action act
   assert(!state.terminated());
 
   vector<pair<State, double> > samples;
-  auto pos = Position(state.x(), state.y());
+  auto pos = state.taxiPosition();
 
   if (state.terminated()) {
     samples.push_back(make_pair(state, 1.0));
@@ -57,7 +57,7 @@ vector<pair<State, double> > TaxiEnv::Transition(const State & state, Action act
   else {
     switch (action) {
       case Putdown:
-        if (state.passenger() != Model::ins().inTaxi() || pos != Model::ins().terminals()[state.destination()]) {
+        if (!state.loaded() || pos != Model::ins().terminals()[state.destination()]) {
           samples.push_back(make_pair(state, 1.0));
         }
         else {
@@ -67,7 +67,7 @@ vector<pair<State, double> > TaxiEnv::Transition(const State & state, Action act
         }
         break;
       case Pickup:
-        if (state.passenger() == Model::ins().inTaxi() || pos != Model::ins().terminals()[state.passenger()]) {
+        if (state.loaded() || pos != Model::ins().terminals()[state.passenger()]) {
           samples.push_back(make_pair(state, 1.0));
         }
         else {
@@ -108,7 +108,6 @@ vector<pair<State, double> > TaxiEnv::Transition(const State & state, Action act
         }
 
         State tmp(state);
-        tmp.fuel() -= 1;
 
         for (int i = 0; i < 3; ++i) {
           Position delta = Model::ins().delta_[locations[i].x][locations[i].y][actions[i]];
@@ -122,16 +121,6 @@ vector<pair<State, double> > TaxiEnv::Transition(const State & state, Action act
 #endif
       }
         break;
-      case Fillup:
-        if (pos == Model::ins().fuelPosition()) {
-          State tmp(state);
-          tmp.fuel() = State::MAX_FUEL;
-          samples.push_back(make_pair(tmp, 1.0));
-        }
-        else {
-          samples.push_back(make_pair(state, 1.0));
-        }
-        break;
       default: assert(0); break;
     }
   }
@@ -144,18 +133,18 @@ double TaxiEnv::Reward(const State & state, Action action)
   assert(!state.terminated());
 
   if (state.terminated()) return 0.0;
-  auto pos = Position(state.x(), state.y());
+  auto pos = state.taxiPosition();
 
   switch (action) {
     case Pickup:
-      if (state.passenger() == Model::ins().inTaxi() || pos != Model::ins().terminals()[state.passenger()]) {
+      if (state.loaded() || pos != Model::ins().terminals()[state.passenger()]) {
         return -10;
       }
       else {
         return -1;
       }
     case Putdown:
-      if (state.passenger() == Model::ins().inTaxi() && pos == Model::ins().terminals()[state.destination()]) {
+      if (state.loaded() && pos == Model::ins().terminals()[state.destination()]) {
         return 20;
       }
       else {
@@ -165,8 +154,6 @@ double TaxiEnv::Reward(const State & state, Action action)
     case South:
     case East:
     case West:
-      return state.fuel() <= 1? -20: -1;
-    case Fillup:
       return -1;
     default: assert(0); return -100000;
   }
@@ -175,16 +162,15 @@ double TaxiEnv::Reward(const State & state, Action action)
 void TaxiEnv::reset()
 {
   Position taxi;
-  int passenger, destination, fuel;
+  int passenger, destination;
 
   do {
     taxi = get_random_position();
     passenger = get_random_stop();
     destination = get_random_stop();
-    fuel = get_random_fuel();
   } while (passenger == destination);
 
-  state_ = State(taxi.x, taxi.y, passenger, destination, fuel);
+  state_ = State(taxi.x, taxi.y, passenger, destination);
 }
 
 TaxiEnv::cond_t TaxiEnv::stateConditions(const State &state)
@@ -192,6 +178,5 @@ TaxiEnv::cond_t TaxiEnv::stateConditions(const State &state)
   return make_tuple(state.passenger(),
                     state.destination(),
                     state.passenger() == 4? 1: state.taxiPosition() == terminal(state.passenger()),
-                    state.taxiPosition() == terminal(state.destination()),
-                    state.taxiPosition() == Model::ins().fuelPosition());
+                    state.taxiPosition() == terminal(state.destination()));
 }

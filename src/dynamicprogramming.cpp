@@ -38,20 +38,17 @@ void DPAgent::ValueIteration()
 				for (int passenger = 0; passenger < 5; ++passenger) {
 					for (int destination = 0; destination < 4; ++destination) {
 						if (destination == passenger) continue;
+						double error = UpdateValue(State(x, y, passenger, destination));
 
-						for (int fuel = 0; fuel <= State::MAX_FUEL; ++fuel) {
-							double error = UpdateValue(State(x, y, passenger, destination, fuel));
-
-							if (error > max_error) {
-								max_error = error;
-							}
+						if (error > max_error) {
+							max_error = error;
 						}
 					}
 				}
 			}
 		}
 
-		cout << episodes++ << " " << max_error << endl;
+		cerr << "#value iteration @ " << episodes++ << " " << max_error << endl;
 
 		if (max_error < 0.01) {
 			break;
@@ -63,11 +60,11 @@ double DPAgent::UpdateValue(const State & state)
 {
 	double error = 0.0;
 
-  if (!state.terminated()) {
-    for (int i = 0; i < ActionSize; ++i) {
-      error += UpdateQValue(state, Action(i));
-    }
-  }
+	if (!state.terminated()) {
+		for (int i = 0; i < ActionSize; ++i) {
+			error += UpdateQValue(state, Action(i));
+		}
+	}
 
 	return error;
 }

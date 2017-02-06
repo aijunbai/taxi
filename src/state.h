@@ -11,9 +11,7 @@
 #include "utils.h"
 #include "prettyprint.h"
 #include <tuple>
-#include "boost/tuple/tuple.hpp"
-#include "boost/tuple/tuple_comparison.hpp"
-#include "boost/tuple/tuple_io.hpp"
+#include <cassert>
 #include <ostream>
 
 #include <string>
@@ -29,7 +27,6 @@ enum Action {
   West,
   Pickup,
   Putdown,
-  Fillup,
 
   ActionSize,
   Null
@@ -46,12 +43,12 @@ inline std::ostream& operator<<(std::ostream& out, const Action value) {
     INSERT_ELEMENT(West);
     INSERT_ELEMENT(Pickup);
     INSERT_ELEMENT(Putdown);
-    INSERT_ELEMENT(Fillup);
     INSERT_ELEMENT(ActionSize);
     INSERT_ELEMENT(Null);
 #undef INSERT_ELEMENT
   }
 
+  assert(strings.count(value));
   return out << strings[value];
 }
 
@@ -64,7 +61,6 @@ inline std::string action_name(Action action)
     case West: return "West";
     case Pickup: return "Pickup";
     case Putdown: return "Putdown";
-    case Fillup: return "Fillup";
     default: return "Null-" + to_string(action);
   }
 }
@@ -92,23 +88,21 @@ struct Position {
   }
 };
 
-class State: public tuple<int, int, int, int, int> {
+class State: public tuple<int, int, int, int> {
 public:
   State() {}
 
-  State(int a, int b, int c, int d, int e);
+  State(int a, int b, int c, int d);
 
   int x() const;
   int y() const;
   int passenger() const;
   int destination() const;
-  int fuel() const;
 
   int& x();
   int& y();
   int& passenger();
   int& destination();
-  int& fuel();
 
   bool terminated() const;
 
@@ -116,18 +110,11 @@ public:
 
   bool loaded() const;
 
-  bool refueled() const;
-
   Position taxiPosition() const;
 
   std::string str() const;
 
   friend ostream &operator<<(ostream &os, const State &o);
-
-  enum {
-    MIN_FUEL = 12,
-    MAX_FUEL = 24
-  };
 };
 
 namespace std {
@@ -184,7 +171,7 @@ struct hash<State>
 {
   std::size_t operator()(const State& k) const
   {
-    return hash<tuple<int, int, int, int, int>>().operator()(k);
+    return hash<tuple<int, int, int, int>>().operator()(k);
   }
 };
 
