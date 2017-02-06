@@ -2,12 +2,11 @@
 namespace po = boost::program_options;
 
 #include <iostream>
-#include <iterator>
+
 using namespace std;
 
 #include "taxi.h"
 #include "system.h"
-#include "agent.h"
 #include "monte-carlo.h"
 #include "sarsa.h"
 #include "qlearning.h"
@@ -19,12 +18,10 @@ using namespace std;
 #include "HierarchicalFSMAgent.h"
 #include "MaxQ0Agent.h"
 #include "MaxQQAgent.h"
+#include "statistic.h"
 
-#include <sys/time.h>
 #include <thread>
 #include <mutex>
-
-#define MOVING_AVERAGE 1
 
 Agent *CreatorAgent(Algorithm algorithm_t, bool train)
 {
@@ -51,55 +48,65 @@ void set_random_seed(int seed)
 }
 
 mutex g_rewards_mutex;
-mutex g_time_mutex;
 mutex g_delete_mutex;
+
+double Run(Algorithm algorithm, Agent *agent, bool leverageInternalTransitions, bool verbose) {
+  double r = 0.0;
+  if (algorithm == ALG_HierarchicalFSM || algorithm == ALG_MaxQ0 || algorithm == ALG_MaxQQ) {
+    r = System().simulateHierarchicalAgent(*static_cast<HierarchicalAgent *>(agent), verbose,
+                                           {{"leverageInternalTransitions", leverageInternalTransitions}});
+  } else {
+    r = System().simulate(*agent, verbose);
+  }
+  return r;
+}
+
+void Profile(Algorithm algorithm, Agent *agent, bool leverageInternalTransitions, bool verbose, STATISTIC *avg_reward) {
+  const int N = 10000;
+
+  agent->set_test(true);
+  for (int n = 0; n < N; ++n) {
+    double r = Run(algorithm, agent, leverageInternalTransitions, verbose);
+    avg_reward->Add(r);
+  }
+}
 
 void call_from_thread(int tid,
                       int num_threads,
                       Algorithm algorithm,
-                      vector<double> *rewards,
-                      vector<double> *time,
-                      double *avg_time,
+                      vector<STATISTIC> *rewards,
+                      vector<STATISTIC> *crewards,
                       int episodes,
                       int trials,
                       bool verbose,
-                      bool leverageInternalTransitions) {
+                      bool leverageInternalTransitions,
+                      bool profile_after_train,
+                      STATISTIC *avg_reward) {
   for (int i = 0; i < trials; ++i) {
     if (i % num_threads == tid) {
       cerr << "#" << algorithm << " @ trials #" << i << endl;
 
       Agent *agent = CreatorAgent(algorithm, true);
 
-      struct timeval start, end;
-      double time_use;
-      gettimeofday(&start, 0);
-
+      double cr = 0.0;
       for (int j = 0; j < episodes; ++j) {
-        if (j % (episodes / 10) == 0) {
+        if (j % (episodes / 100) == 0) {
           cerr << "#" << algorithm << " @ episodes #" << j << endl;
         }
 
-        double r = 0.0;
-        if (algorithm == ALG_HierarchicalFSM || algorithm == ALG_MaxQ0 || algorithm == ALG_MaxQQ) {
-          r = System().simulateHierarchicalAgent(*static_cast<HierarchicalAgent *>(agent), verbose,
-                                                 {{"leverageInternalTransitions", leverageInternalTransitions}});
-        } else {
-          r = System().simulate(*agent, verbose);
-        }
-
+        double r = Run(algorithm, agent, leverageInternalTransitions, verbose);
+        cr += r;
         g_rewards_mutex.lock();
-        (*rewards)[j] += r;
+        (*rewards)[j].Add(r);
+        (*crewards)[j].Add(cr);
         g_rewards_mutex.unlock();
       }
 
-      gettimeofday(&end, 0);
-      time_use = 1000000.0 * (end.tv_sec - start.tv_sec) + end.tv_usec - start.tv_usec;
-      time_use /= 1000.0;
-
-      g_time_mutex.lock();
-      *avg_time += time_use;
-      time->push_back(time_use);
-      g_time_mutex.unlock();
+      if (profile_after_train) {
+        g_rewards_mutex.lock();
+        Profile(algorithm, agent, leverageInternalTransitions, verbose, avg_reward);
+        g_rewards_mutex.unlock();
+      }
 
       g_delete_mutex.lock();
       delete agent;
@@ -218,75 +225,13 @@ int main(int argc, char **argv) {
   PRINT_VALUE(ActionSize);
   PRINT_VALUE(ALG_None);
 
-  if (profile) {
-    double avg_reward = 0.0, avg_time = 0.0;
-    int N = 10000;
-
-    vector<double> rewards, time;
-
-    Agent *agent = CreatorAgent(algorithm, false);
-
-    for (int n = 0; n < N; ++n) {
-      struct timeval start, end;
-      double time_use;
-      gettimeofday(&start, 0);
-
-      double reward = 0.0;
-      if (algorithm == ALG_HierarchicalFSM || algorithm == ALG_MaxQ0 || algorithm == ALG_MaxQQ) {
-        reward = System().simulateHierarchicalAgent(*static_cast<HierarchicalAgent *>(agent), verbose,
-                                                    {{"leverageInternalTransitions", leverageInternalTransitions}});
-      }
-      else {
-        reward = System().simulate(*agent, verbose);
-      }
-
-      gettimeofday(&end, 0);
-      time_use = 1000000.0 * (end.tv_sec - start.tv_sec) + end.tv_usec - start.tv_usec;
-      time_use /= 1000.0;
-
-      avg_reward += reward;
-      avg_time += time_use;
-
-      rewards.push_back(reward);
-      time.push_back(time_use);
-    }
-
-    delete agent;
-
-    avg_reward /= N;
-    avg_time /= N;
-
-    double sum_rewards = 0.0, sum_time = 0.0;
-    for (int i = 0; i < N; ++i) {
-      sum_rewards += (rewards[i] - avg_reward) * (rewards[i] - avg_reward);
-      sum_time += (time[i] - avg_time) * (time[i] - avg_time);
-    }
-
-    cout << TaxiEnv::SIZE << " ";
-    cout << avg_reward << " " << sqrt(sum_rewards) / N << " ";
-    cout << avg_time << " " << sqrt(sum_time) / N << endl;
-  }
-  else if (!train) { //test
-    Agent *agent = CreatorAgent(algorithm, false);
-
-    if (algorithm == ALG_HierarchicalFSM || algorithm == ALG_MaxQ0 || algorithm == ALG_MaxQQ) {
-      cout << "Reward: " << System().simulateHierarchicalAgent(*static_cast<HierarchicalAgent *>(agent), verbose,
-                                                               {{"leverageInternalTransitions", leverageInternalTransitions}}) << endl;
-    }
-    else {
-      cout << "Reward: " << System().simulate(*agent, verbose) << endl;
-    }
-
-    delete agent;
-  }
-  else { //train for rl agent
+  if (train) { //train for rl agent
     int num_threads = 1;
     if (multithreaded) num_threads = thread::hardware_concurrency();
 
-    vector<double> rewards(episodes, 0.0);
-    vector<double> crewards(episodes, 0.0);
-    vector<double> time;
-    double avg_time = 0.0;
+    vector<STATISTIC> rewards(episodes);
+    vector<STATISTIC> crewards(episodes);
+    STATISTIC avg_reward;
 
     std::thread t[num_threads];
 
@@ -297,12 +242,13 @@ int main(int argc, char **argv) {
           num_threads,
           algorithm,
           &rewards,
-          &time,
-          &avg_time,
+          &crewards,
           episodes,
           trials,
           verbose,
-          leverageInternalTransitions);
+          leverageInternalTransitions,
+          profile,
+          &avg_reward);
     }
 
     //Join the threads with the main thread
@@ -311,52 +257,26 @@ int main(int argc, char **argv) {
     }
 
     for (int i = 0; i < episodes; ++i) {
-      rewards[i] /= trials;
-
-      if (i == 0) crewards[i] = rewards[i];
-      else crewards[i] = crewards[i - 1] + rewards[i];
+      int j = i + 1;
+      if (j >= 100 && j % (int) exp10((int) log10(j)) == 0) {
+        cout << j << " " << rewards[i].GetMean() << " " << rewards[i].GetConfidenceInt()
+             << " " << crewards[i].GetMean() << " " << crewards[i].GetConfidenceInt()
+             << " #" << rewards[i] << " " << crewards[i] << endl;
+      }
     }
 
-#if MOVING_AVERAGE
-    double avg = 0.0;
-    double cavg = 0.0;
-
-    queue<double> Q;
-    queue<double> cQ;
-
-    const int win = 100;
-    for (int i = 0; i < win; ++i) {
-      avg = (avg * Q.size() + rewards[i]) / (Q.size() + 1);
-      Q.push(rewards[i]);
-
-      cavg = (cavg * cQ.size() + crewards[i]) / (cQ.size() + 1);
-      cQ.push(crewards[i]);
-    }
-
-    for (int i = win; i < episodes; ++i) {
-      avg = (avg * Q.size() - Q.front() + rewards[i]) / Q.size();
-      Q.pop();
-      Q.push(rewards[i]);
-
-      cavg = (cavg * cQ.size() - cQ.front() + crewards[i]) / cQ.size();
-      cQ.pop();
-      cQ.push(crewards[i]);
-
-      cout << i << " " << avg << " " << cavg << endl;
-    }
-#else
-    for (int i = 0; i < episodes; ++i) {
-      cout << i << " " << rewards[i] << " " << crewards[i] << endl;
-    }
-#endif
-
-    avg_time /= time.size();
-    double sum_time = 0.0;
-    for (int i = 0; i < trials; ++i) {
-      sum_time += (time[i] - avg_time) * (time[i] - avg_time);
-    }
-
-    cout << "#Avg. Time: " << avg_time << "+/-" << sqrt(sum_time) / trials << endl;
+    cout << "#" << algorithm << " profile after train --  avg reward:" << avg_reward << endl;
+  } else if (profile) { //profile a trained or online agent
+    Agent *agent = CreatorAgent(algorithm, false);
+    STATISTIC avg_reward;
+    Profile(algorithm, agent, leverageInternalTransitions, verbose, &avg_reward);
+    cout << "#" << algorithm << " profile --  avg reward:" << avg_reward << endl;
+    delete agent;
+  } else { // run once
+    Agent *agent = CreatorAgent(algorithm, false);
+    double reward = Run(algorithm, agent, leverageInternalTransitions, verbose);
+    cout << "Reward: " << reward << endl;
+    delete agent;
   }
 
   return 0;

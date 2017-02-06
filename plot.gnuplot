@@ -164,7 +164,14 @@ set loadpath
 set fontpath 
 set psdir
 set fit brief errorvariables nocovariancevariables errorscaling prescale nowrap v5
-set grid
 GNUTERM = "wxt"
 x = 0.0
+set grid
 set log x
+set border linewidth 1
+set style line 1 lc rgb 'red' lt 1 lw 2 pt 7 ps 1.
+set style line 2 lc rgb 'green' lt 1 lw 2 pt 9 ps 1.
+set style line 3 lc rgb 'blue' lt 1 lw 2 pt 13 ps 1.
+set style line 4 lc rgb 'cyan' lt 1 lw 2 pt 11 ps 1.
+set style line 5 lc rgb 'purple' lt 1 lw 2 pt 5 ps 1.
+set style line 6 lc rgb 'orange' lt 1 lw 2 pt 5 ps 1.

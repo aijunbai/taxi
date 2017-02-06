@@ -34,7 +34,7 @@ declare -a ALGS=(
         "qlearning" 
     )
 
-TRIALS="4"
+TRIALS="8"
 
 if [ $VERSION = "debug" ]; then
     OPT="--debug $OPT"
@@ -56,11 +56,13 @@ echo "set title \"averaged cumulative reward\"" >> cplot.gnuplot
 echo "plot \\" >> plot.gnuplot
 echo "plot \\" >> cplot.gnuplot
 
+LS="1"
 for alg in "${ALGS[@]}"; do
     time ../maxq_op $OPT --size $SIZE --trials $TRIALS --episodes $EPISODES \
-        --train --multithreaded --$alg > ${alg}.out
-    echo "'${alg}.out' u 1:2 w l t \"${alg}\", \\" >> plot.gnuplot
-    echo "'${alg}.out' u 1:3 w l t \"${alg}\", \\" >> cplot.gnuplot
+        --train --profile --multithreaded --$alg > ${alg}.out
+    echo "'${alg}.out' u 1:2 t \"${alg}\" ls $LS smooth bezier, \\" >> plot.gnuplot
+    echo "'${alg}.out' u 1:4 t \"${alg}\" ls $LS smooth bezier, \\" >> cplot.gnuplot
+    LS="`expr $LS + 1`"
 done
 
 ./plot.sh

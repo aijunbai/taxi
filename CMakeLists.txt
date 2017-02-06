@@ -41,7 +41,7 @@ set(SOURCE_FILES
         src/tdagent.h
         src/uct.cpp
         src/uct.h
-        src/utils.h src/HierarchicalFSMAgent.cpp src/HierarchicalFSMAgent.h src/ChoicePoint.h src/HierarchicalFSM.cpp src/HierarchicalFSM.h src/prettyprint.h src/MaxQ0Agent.cpp src/MaxQ0Agent.h src/HierarchicalAgent.cpp src/HierarchicalAgent.h src/MaxQQAgent.cpp src/MaxQQAgent.h)
+        src/utils.h src/HierarchicalFSMAgent.cpp src/HierarchicalFSMAgent.h src/ChoicePoint.h src/HierarchicalFSM.cpp src/HierarchicalFSM.h src/prettyprint.h src/MaxQ0Agent.cpp src/MaxQ0Agent.h src/HierarchicalAgent.cpp src/HierarchicalAgent.h src/MaxQQAgent.cpp src/MaxQQAgent.h src/statistic.h)
 
 add_executable(maxq_op ${SOURCE_FILES})
 TARGET_LINK_LIBRARIES( maxq_op boost_program_options boost_serialization pthread )
