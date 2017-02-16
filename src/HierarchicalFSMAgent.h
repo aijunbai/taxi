@@ -70,7 +70,7 @@ public:
   int selectChoice(const State &state, const string &machineState, int numChoices);
   int argmaxQ(const State &state, const string &machineState, int numChoices);
 
-  int Qupdate(const State &state, const string &machineState, int numChoices, int current_time);
+  int QUpdate(const State &state, const string &machineState, int numChoices, int current_time);
 
 public:
   void PushStack(const string &s);

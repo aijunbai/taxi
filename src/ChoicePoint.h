@@ -25,7 +25,7 @@ public:
   T choose(HierarchicalFSM *m) {
     auto state = m->state();
     auto machineState = m->machineState();
-    auto i = m->agent->Qupdate(state, machineState, choices.size(), m->agent->steps);
+    auto i = m->agent->QUpdate(state, machineState, choices.size(), m->agent->steps);
     assert(i < (int) choices.size());
     return choices[i];
   }

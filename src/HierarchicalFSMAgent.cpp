@@ -2,7 +2,6 @@
 // Created by baj on 1/14/17.
 //
 
-#include <climits>
 #include "HierarchicalFSMAgent.h"
 #include "HierarchicalFSM.h"
 #include "ChoicePoint.h"
@@ -134,7 +133,7 @@ double HierarchicalFSMAgent::V(const State &state, const string &machineState, i
   return Q(state, machineState, argmaxQ(state, machineState, numChoices));
 }
 
-int HierarchicalFSMAgent::Qupdate(
+int HierarchicalFSMAgent::QUpdate(
     const State &state, const string &machineState, int numChoices, int current_time)
 {
   assert(!numChoicesMap.count(machineState) || numChoicesMap[machineState] == numChoices);

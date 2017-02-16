@@ -4,9 +4,7 @@
 
 #include "HierarchicalFSM.h"
 
-#include "HierarchicalFSM.h"
 #include "ChoicePoint.h"
-#include "prettyprint.h"
 
 using namespace std;
 
@@ -53,7 +51,7 @@ void Root::run(unordered_map<string, int> parameters) {
   Runner(get).operator()();
   if (running()) Runner(put).operator()();
 
-  agent->Qupdate(state(), machineState(), 1, agent->steps);
+  agent->QUpdate(state(), machineState(), 1, agent->steps);
 }
 
 Primitive::Primitive(HierarchicalFSMAgent *p, Action a, string name): HierarchicalFSM(p, "$" + name) {

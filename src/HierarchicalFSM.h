@@ -103,10 +103,6 @@ public:
 private:
   HierarchicalFSM *pickup;
   HierarchicalFSM *nav;
-
-#if UNDETERMINISTIC_MACHINE
-  ChoicePoint<HierarchicalFSM *> *choice;
-#endif
 };
 
 class Put: public HierarchicalFSM {
@@ -118,10 +114,6 @@ public:
 private:
   HierarchicalFSM *putdown;
   HierarchicalFSM *nav;
-
-#if UNDETERMINISTIC_MACHINE
-  ChoicePoint<HierarchicalFSM *> *choice;
-#endif
 };
 
 class Navigate: public HierarchicalFSM {
