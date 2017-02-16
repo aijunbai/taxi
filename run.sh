@@ -21,20 +21,19 @@ set -o nounset                              # Treat unset variables as an error
 
 VERSION="release"
 SIZE="5"
-EPISODES="100000"
+EPISODES="1000000"
 PLT="plot.gnuplot"
+PROFILE=""
 OPT=""
 
 declare -a ALGS=(
-        "dynamicprogramming"
-        "hierarchicalfsm" 
         "hierarchicalfsmint" 
+        "hierarchicalfsm" 
         "maxq0" 
         "maxqq" 
-        "qlearning" 
     )
 
-TRIALS="8"
+TRIALS="4"
 
 if [ $VERSION = "debug" ]; then
     OPT="--debug $OPT"
@@ -51,6 +50,8 @@ cp ../${PLT} plot.gnuplot
 cp ../${PLT} cplot.gnuplot
 cp ../plot.sh .
 
+echo "set output \"reward.png\"" >> plot.gnuplot
+echo "set output \"cumulativereward.png\"" >> cplot.gnuplot
 echo "set title \"averaged reward\"" >> plot.gnuplot
 echo "set title \"averaged cumulative reward\"" >> cplot.gnuplot
 echo "plot \\" >> plot.gnuplot
@@ -59,7 +60,7 @@ echo "plot \\" >> cplot.gnuplot
 LS="1"
 for alg in "${ALGS[@]}"; do
     time ../maxq_op $OPT --size $SIZE --trials $TRIALS --episodes $EPISODES \
-        --train --profile --multithreaded --$alg > ${alg}.out
+        --train $PROFILE --multithreaded --$alg > ${alg}.out
     echo "'${alg}.out' u 1:2 t \"${alg}\" ls $LS smooth bezier, \\" >> plot.gnuplot
     echo "'${alg}.out' u 1:4 t \"${alg}\" ls $LS smooth bezier, \\" >> cplot.gnuplot
     LS="`expr $LS + 1`"

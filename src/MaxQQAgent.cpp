@@ -44,14 +44,13 @@ list<State> MaxQQAgent::MaxQQ(Task i, State s)
 
 double MaxQQAgent::run() {
   State state = env()->state();
-  buildHierarchy(state);
   MaxQQ(Root_T, state);
   return rewards;
 }
 
 double MaxQQAgent::R2(Task i, const State &s)
 {
-  if (IsTerminalState(i, s)) return 10.0;
+  if (IsTerminalState(i, s)) return 1.0;
   return 0.0;
 }
 

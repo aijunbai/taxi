@@ -2,7 +2,6 @@
 // Created by baj on 2/2/17.
 //
 
-#include <climits>
 #include "MaxQ0Agent.h"
 
 MaxQ0Agent::MaxQ0Agent(const bool test): HierarchicalAgent(test) {
@@ -19,28 +18,8 @@ MaxQ0Agent::MaxQ0Agent(const bool test): HierarchicalAgent(test) {
   subtasks_[NavY_T] = {North_T, South_T, East_T, West_T};
 }
 
-void MaxQ0Agent::buildHierarchy(const State &s)
-{
-  switch (s.passenger()) {
-    case 0: subtasks_[Get_T] = {Pickup_T, NavY_T}; break;
-    case 1: subtasks_[Get_T] = {Pickup_T, NavR_T}; break;
-    case 2: subtasks_[Get_T] = {Pickup_T, NavB_T}; break;
-    case 3: subtasks_[Get_T] = {Pickup_T, NavG_T}; break;
-    default: assert(0);
-  }
-
-  switch (s.destination()) {
-    case 0: subtasks_[Put_T] = {Putdown_T, NavY_T}; break;
-    case 1: subtasks_[Put_T] = {Putdown_T, NavR_T}; break;
-    case 2: subtasks_[Put_T] = {Putdown_T, NavB_T}; break;
-    case 3: subtasks_[Put_T] = {Putdown_T, NavG_T}; break;
-    default: assert(0);
-  }
-}
-
 double MaxQ0Agent::run() {
   State state = env()->state();
-  buildHierarchy(state);
   MaxQ0(Root_T, state);
   return rewards;
 }
@@ -124,22 +103,28 @@ bool MaxQ0Agent::IsPrimitive(Task task)
 bool MaxQ0Agent::IsActiveState(Task task, const State & state)
 {
   switch (task) {
-    case Root_T: return true;
+    case Root_T:
+      return !state.terminated();
 
     case Get_T: return !state.loaded();
     case Put_T: return state.loaded();
 
     case NavR_T:
+      return state.taxiPosition() != TaxiEnv::Model::ins().terminals()[1];
     case NavY_T:
+      return state.taxiPosition() != TaxiEnv::Model::ins().terminals()[0];
     case NavG_T:
-    case NavB_T: return true;
+      return state.taxiPosition() != TaxiEnv::Model::ins().terminals()[3];
+    case NavB_T:
+      return state.taxiPosition() != TaxiEnv::Model::ins().terminals()[2];
 
     case Pickup_T:
     case Putdown_T:
     case North_T:
     case South_T:
     case East_T:
-    case West_T: return true; //can performed in any state
+    case West_T:
+      return true; //can be performed in any state
 
     default: assert(0); return false;
   }
@@ -150,7 +135,8 @@ bool MaxQ0Agent::IsTerminalState(Task task, const State & state)
   if (state.terminated()) return true;
 
   switch (task) {
-    case Root_T: return state.unloaded();
+    case Root_T:
+      return state.terminated();
 
     case Get_T: return state.loaded();
     case Put_T: return state.unloaded();

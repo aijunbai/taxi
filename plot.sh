@@ -23,3 +23,8 @@ gnuplot -p plot.gnuplot &
 gnuplot -p cplot.gnuplot &
 
 wait
+
+eog reward.png &
+eog cumulativereward.png &
+
+wait

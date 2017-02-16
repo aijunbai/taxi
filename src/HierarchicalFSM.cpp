@@ -108,7 +108,7 @@ Navigate::Navigate(HierarchicalFSMAgent *p): HierarchicalFSM(p, "$Nav") {
   west = new Primitive(p, West, action_name(West));
 
   choice = new ChoicePoint<HierarchicalFSM *>("@Dir", {north, south, east, west});
-  choice2 = new ChoicePoint<int>("@Step", {1, 2, 3, 4});
+  choice2 = new ChoicePoint<int>("@Step", {1/*, 2, 3, 4*/});
 }
 
 Navigate::~Navigate() {

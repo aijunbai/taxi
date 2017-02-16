@@ -10,8 +10,9 @@
 #    	gnuplot home:     http://www.gnuplot.info
 #    	faq, bugs, etc:   type "help FAQ"
 #    	immediate help:   type "help"  (plot window: hit 'h')
-# set terminal wxt 0 enhanced
-# set output
+#set terminal wxt 0 enhanced
+#set output
+set term pngcairo dashed size 640,384
 unset clip points
 set clip one
 unset clip two
@@ -166,12 +167,16 @@ set psdir
 set fit brief errorvariables nocovariancevariables errorscaling prescale nowrap v5
 GNUTERM = "wxt"
 x = 0.0
+set key right bottom Right
 set grid
 set log x
 set border linewidth 1
-set style line 1 lc rgb 'red' lt 1 lw 2 pt 7 ps 1.
-set style line 2 lc rgb 'green' lt 1 lw 2 pt 9 ps 1.
-set style line 3 lc rgb 'blue' lt 1 lw 2 pt 13 ps 1.
-set style line 4 lc rgb 'cyan' lt 1 lw 2 pt 11 ps 1.
-set style line 5 lc rgb 'purple' lt 1 lw 2 pt 5 ps 1.
-set style line 6 lc rgb 'orange' lt 1 lw 2 pt 5 ps 1.
+set termoption dash
+set for [i=2:6] linetype i dt i
+set style line 1 lc rgb 'red' lt 1 lw 3 pt 7 ps 1.
+set style line 2 lc rgb 'green' lt 2 lw 3 pt 9 ps 1.
+set style line 3 lc rgb 'blue' lt 3 lw 3 pt 13 ps 1.
+set style line 4 lc rgb 'purple' lt 4 lw 3 pt 11 ps 1.
+set style line 5 lc rgb 'orange' lt 5 lw 3 pt 5 ps 1.
+set style line 6 lc rgb 'cyan' lt 6 lw 3 pt 5 ps 1.
+set xlabel "Number of Episodes" font "DejaVuSansCondensed"

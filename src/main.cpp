@@ -265,7 +265,8 @@ int main(int argc, char **argv) {
       }
     }
 
-    cout << "#" << algorithm << " profile after train --  avg reward:" << avg_reward << endl;
+    if (profile)
+      cout << "#" << algorithm << " profile after train --  avg reward:" << avg_reward << endl;
   } else if (profile) { //profile a trained or online agent
     Agent *agent = CreatorAgent(algorithm, false);
     STATISTIC avg_reward;

@@ -56,8 +56,6 @@ public:
 
   virtual double run();
 
-  void buildHierarchy(const State &s);
-
   int MaxQ0(Task i, State s);
   double V(Task i, const State &s);
   Task Pi(Task i, const State &s);

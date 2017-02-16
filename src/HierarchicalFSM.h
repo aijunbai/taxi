@@ -81,7 +81,6 @@ public:
 private:
   HierarchicalFSM *get;
   HierarchicalFSM *put;
-
 };
 
 class Primitive: public HierarchicalFSM {
