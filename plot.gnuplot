@@ -180,3 +180,4 @@ set style line 4 lc rgb 'purple' lt 4 lw 3 pt 11 ps 1.
 set style line 5 lc rgb 'orange' lt 5 lw 3 pt 5 ps 1.
 set style line 6 lc rgb 'cyan' lt 6 lw 3 pt 5 ps 1.
 set xlabel "Number of Episodes" font "DejaVuSansCondensed"
+set ylabel "Reward per Episode" font "DejaVuSansCondensed"

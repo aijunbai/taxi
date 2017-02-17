@@ -141,10 +141,14 @@ int main(int argc, char **argv) {
         ("dynamicprogramming", "use DynamicProgramming algorithm")
         ("astar", "use A* algorithm")
         ("uct", "use UCT algorithm")
-        ("hierarchicalfsm", "use hierarchical FSM algorithm")
-        ("hierarchicalfsmint", "take advantage of internal transitions for hierarchicalfsm")
-        ("maxq0", "use MaxQ0 algorithm")
-        ("maxqq", "use MaxQQ algorithm")
+        ("hierarchicalfsm", "use HAMQ algorithm")
+        ("HAMQ", "use HAMQ algorithm")
+        ("hierarchicalfsmint", "use HAMQ-INT algorithm")
+        ("HAMQ-INT", "use HAMQ-INT algorithm")
+        ("maxq0", "use MaxQ-0 algorithm")
+        ("MaxQ-0", "use MaxQ-0 algorithm")
+        ("maxqq", "use MaxQ-Q algorithm")
+        ("MaxQ-Q", "use MaxQ-Q algorithm")
         ("size", po::value<int>(&TaxiEnv::SIZE), "Problem size")
         ("trials", po::value<int>(&trials), "Training trials")
         ("episodes", po::value<int>(&episodes), "Training episodes")
@@ -164,7 +168,7 @@ int main(int argc, char **argv) {
     profile = vm.count("profile");
     verbose = vm.count("verbose");
     multithreaded = vm.count("multithreaded");
-    leverageInternalTransitions = vm.count("hierarchicalfsmint");
+    leverageInternalTransitions = vm.count("hierarchicalfsmint") || vm.count("HAMQ-INT");
 
     if (vm.count("monte-carlo")) {
       algorithm = ALG_MonteCarlo;
@@ -189,14 +193,14 @@ int main(int argc, char **argv) {
     }
     else if (vm.count("uct")) {
       algorithm = ALG_UCT;
-    }
-    else if (vm.count("hierarchicalfsm") || vm.count("hierarchicalfsmint")) {
+    } else if (vm.count("hierarchicalfsm")
+               || vm.count("hierarchicalfsmint")
+               || vm.count("HAMQ")
+               || vm.count("HAMQ-INT")) {
       algorithm = ALG_HierarchicalFSM;
-    }
-    else if (vm.count("maxq0")) {
+    } else if (vm.count("maxq0") || vm.count("MaxQ-0")) {
       algorithm = ALG_MaxQ0;
-    }
-    else if (vm.count("maxqq")) {
+    } else if (vm.count("maxqq") || vm.count("MaxQ-Q")) {
       algorithm = ALG_MaxQQ;
     }
     else {

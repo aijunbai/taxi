@@ -19,12 +19,5 @@
 
 set -o nounset                              # Treat unset variables as an error
 
-gnuplot -p plot.gnuplot &
-gnuplot -p cplot.gnuplot &
-
-wait
-
-eog reward.png &
-eog cumulativereward.png &
-
-wait
+gnuplot -p plot.gnuplot
+eog reward.png
