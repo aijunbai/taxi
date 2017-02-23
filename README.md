@@ -1,4 +1,5 @@
 # Hierarchical online planning and reinforcement learning on Taxi
+[![Build Status](https://travis-ci.org/aijunbai/taxi.svg?branch=master)](https://travis-ci.org/aijunbai/taxi)
 
 This release consists of codes for two projects:
 - The MAXQ-based hierarchical online planning algorithm: MAXQ-OP
@@ -8,8 +9,6 @@ This release consists of codes for two projects:
 - This is an ongoing work. The idea is to identify and take advantage of internal transitions within a HAM for efficient hierarchical reinforcement learning.
 
 # maxq-op
-[![Build Status](https://travis-ci.org/aijunbai/maxq-op.svg?branch=master)](https://travis-ci.org/aijunbai/maxq-op)
-
 This is the code release of MAXQ-OP algorithm for the Taxi domain as shown in papers:
 - [Online planning for large Markov decision processes with hierarchical decomposition](https://aijunbai.github.io/publications/TIST15-Bai.pdf), Aijun Bai, Feng Wu, and Xiaoping Chen, ACM Transactions on Intelligent Systems and Technology (ACM TIST),6(4):45:1–45:28, July 2015.
 - [Online Planning for Large MDPs with MAXQ Decomposition (Extended Abstract)](http://aijunbai.github.io/publications/AAMAS12-Bai.pdf), Aijun Bai, Feng Wu, and Xiaoping Chen, Proceedings of the 11th International Conference on Autonomous Agents and Multiagent Systems (AAMAS), Valencia, Spain, June 2012.
