@@ -1,3 +1,12 @@
+# Hierarchical online planning and reinforcement learning on Taxi
+
+This release consists of codes for two projects:
+- The MAXQ-based hierarchical online planning algorithm: MAXQ-OP
+- The HAMQ-based hierarchical reinforcement learning algorithm: HAMQ-INT
+
+# hamq-int
+- This is an ongoing work. The idea is to identify and take advantage of internal transitions within a HAM for efficient hierarchical reinforcement learning.
+
 # maxq-op
 [![Build Status](https://travis-ci.org/aijunbai/maxq-op.svg?branch=master)](https://travis-ci.org/aijunbai/maxq-op)
 
@@ -10,7 +19,10 @@ This is the code release of MAXQ-OP algorithm for the Taxi domain as shown in pa
 It has also some less-tested implementations of other reinforcement learning and offline/online planning algorithms, such as dynamic programming, Q learning, SARSA learning, expected A\*, UCT, etc. 
 
 # Files
-- `maxqop.{h, cpp}`: main MAXQ-OP algorithm
+- `maxqop.{h, cpp}`: the MAXQ-OP algorithm
+- `HierarchicalFSMAgent.{h, cpp}`: the HAMQ-INT algorithm
+- `MaxQ0Agent.{h, cpp}`: the MAXQ-0 algorithm
+- `MaxQQAgent.{h, cpp}`: the MAXQ-Q algorithm
 - `agent.h`: abstract `Agent` class
 - `state.{h, cpp}`: abstract `State` class
 - `policy.{h, cpp}`: `Policy` classes
