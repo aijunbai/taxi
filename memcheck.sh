@@ -24,5 +24,5 @@ ulimit -c unlimited
 make clean
 make debug
 
-valgrind ./maxq_op --size 5 --multithreaded --trials 8 --episodes 1000 --train --hierarchicalfsmdet 2>&1 | tee -a valgrind.log
+valgrind ./taxi --size 5 --multithreaded --trials 8 --episodes 1000 --train --hierarchicalfsmdet 2>&1 | tee -a valgrind.log
 

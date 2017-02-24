@@ -11,5 +11,5 @@ while read LINE; do
 done <breakpoints
 cat gdbinit >> .gdbinit
 
-cgdb -- maxq_op 
+cgdb -- taxi 
 

@@ -18,6 +18,6 @@ fi
 
 echo Profiling \"$@\"
 valgrind --tool=callgrind --dump-instr=yes --trace-jump=yes --callgrind-out-file="profile_results/callgrind.out.%p" \
-    ../maxq_op --size 5 --train --$ALG --debug --trials 1 --episodes 2000 2>&1 | tee callgrind.txt
+    ../taxi --size 5 --train --$ALG --debug --trials 1 --episodes 2000 2>&1 | tee callgrind.txt
 kcachegrind `ls -t1 profile_results/callgrind.out.*|head -n 1`
 

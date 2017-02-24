@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(maxq_op)
+project(taxi)
 
 set(CMAKE_CXX_STANDARD 11)
 set (CMAKE_CXX_FLAGS "--std=gnu++11 ${CMAKE_CXX_FLAGS}")
@@ -43,5 +43,5 @@ set(SOURCE_FILES
         src/uct.h
         src/utils.h src/HierarchicalFSMAgent.cpp src/HierarchicalFSMAgent.h src/ChoicePoint.h src/HierarchicalFSM.cpp src/HierarchicalFSM.h src/prettyprint.h src/MaxQ0Agent.cpp src/MaxQ0Agent.h src/HierarchicalAgent.cpp src/HierarchicalAgent.h src/MaxQQAgent.cpp src/MaxQQAgent.h src/statistic.h)
 
-add_executable(maxq_op ${SOURCE_FILES})
-TARGET_LINK_LIBRARIES( maxq_op boost_program_options pthread )
+add_executable(taxi ${SOURCE_FILES})
+TARGET_LINK_LIBRARIES(taxi boost_program_options pthread )
