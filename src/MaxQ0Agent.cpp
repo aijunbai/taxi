@@ -9,8 +9,8 @@ MaxQ0Agent::MaxQ0Agent(const bool test): HierarchicalAgent(test) {
 
   subtasks_[Root_T] = {Get_T, Put_T};
 
-  subtasks_[Get_T] = {Pickup_T, NavB_T, NavG_T, NavR_T, NavY_T}; //to be redefined based on input state
-  subtasks_[Put_T] = {Putdown_T, NavB_T, NavG_T, NavR_T, NavY_T};  //to be redefined based on input state
+  subtasks_[Get_T] = {Pickup_T, NavB_T, NavG_T, NavR_T, NavY_T};
+  subtasks_[Put_T] = {Putdown_T, NavB_T, NavG_T, NavR_T, NavY_T};
 
   subtasks_[NavB_T] = {North_T, South_T, East_T, West_T};
   subtasks_[NavG_T] = {North_T, South_T, East_T, West_T};

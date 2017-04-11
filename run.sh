@@ -21,6 +21,7 @@ set -o nounset                              # Treat unset variables as an error
 
 VERSION="release"
 SIZE="5"
+TRIALS="400"
 EPISODES="100000"
 PLT="plot.gnuplot"
 PROFILE=""
@@ -32,8 +33,6 @@ declare -a ALGS=(
         "MaxQ-0" 
         "MaxQ-Q" 
     )
-
-TRIALS="4"
 
 if [ $VERSION = "debug" ]; then
     OPT="--debug $OPT"

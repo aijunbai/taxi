@@ -174,10 +174,10 @@ set border linewidth 1
 set termoption dash
 set for [i=2:6] linetype i dt i
 set style line 1 lc rgb 'red' lt 1 lw 3 pt 7 ps 1.
-set style line 2 lc rgb 'green' lt 2 lw 3 pt 9 ps 1.
+set style line 2 lc rgb 'orange' lt 2 lw 3 pt 9 ps 1.
 set style line 3 lc rgb 'blue' lt 3 lw 3 pt 13 ps 1.
-set style line 4 lc rgb 'orange' lt 4 lw 3 pt 11 ps 1.
-set style line 5 lc rgb 'purple' lt 5 lw 3 pt 5 ps 1.
+set style line 4 lc rgb 'purple' lt 4 lw 3 pt 11 ps 1.
+set style line 5 lc rgb 'green' lt 5 lw 3 pt 5 ps 1.
 set style line 6 lc rgb 'cyan' lt 6 lw 3 pt 5 ps 1.
 set xlabel "Number of Episodes" font "DejaVuSansCondensed"
 set ylabel "Reward per Episode" font "DejaVuSansCondensed"
