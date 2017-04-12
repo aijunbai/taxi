@@ -47,6 +47,11 @@ void set_random_seed(int seed)
   srand48(seed);
 }
 
+bool double_is_int(double trouble) {
+   double absolute = abs( trouble );
+   return absolute == floor(absolute);
+}
+
 mutex g_rewards_mutex;
 mutex g_delete_mutex;
 
@@ -262,7 +267,7 @@ int main(int argc, char **argv) {
 
     for (int i = 0; i < episodes; ++i) {
       int j = i + 1;
-      if (j >= 100 && j % (int) exp10((int) log10(j)) == 0) {
+      if (j >= 1 && double_is_int(log10(j))) {
         cout << j << " " << rewards[i].GetMean() << " " << rewards[i].GetConfidenceInt()
              << " " << crewards[i].GetMean() << " " << crewards[i].GetConfidenceInt()
              << " #" << rewards[i] << " " << crewards[i] << endl;

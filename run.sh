@@ -30,8 +30,8 @@ OPT=""
 declare -a ALGS=(
         "HAMQ-INT" 
         "HAMQ" 
-        "MaxQ-0" 
         "MaxQ-Q" 
+        "MaxQ-0" 
     )
 
 if [ $VERSION = "debug" ]; then
@@ -55,7 +55,7 @@ LS="1"
 for alg in "${ALGS[@]}"; do
     time ../taxi $OPT --size $SIZE --trials $TRIALS --episodes $EPISODES \
         --train $PROFILE --multithreaded --$alg > ${alg}.out
-    echo "'${alg}.out' u 1:2 t \"${alg}\" ls $LS smooth bezier, \\" >> plot.gnuplot
+    echo "'${alg}.out' u 1:2:3 t \"${alg}\" ls $LS with yerrorlines, \\" >> plot.gnuplot
     LS="`expr $LS + 1`"
 done
 
