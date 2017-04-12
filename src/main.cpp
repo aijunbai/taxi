@@ -267,7 +267,7 @@ int main(int argc, char **argv) {
 
     for (int i = 0; i < episodes; ++i) {
       int j = i + 1;
-      if (j >= 1 && double_is_int(log10(j))) {
+      if (j >= 1 && double_is_int(log(j)/log(2.0))) {
         cout << j << " " << rewards[i].GetMean() << " " << rewards[i].GetConfidenceInt()
              << " " << crewards[i].GetMean() << " " << crewards[i].GetConfidenceInt()
              << " #" << rewards[i] << " " << crewards[i] << endl;
