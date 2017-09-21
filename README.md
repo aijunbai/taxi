@@ -6,7 +6,11 @@ This release consists of codes for two projects:
 - The HAMQ-based hierarchical reinforcement learning algorithm: HAMQ-INT
 
 # hamq-int
-- This is an ongoing work. The idea is to identify and take advantage of internal transitions within a HAM for efficient hierarchical reinforcement learning.
+- This is an ongoing work. The idea is to identify and take advantage of internal transitions within a HAM for efficient hierarchical reinforcement learning. Some details can be found in:
+-   **Efficient Reinforcement Learning with Hierarchies of Machines by Leveraging Internal Transitions**, *Aijun Bai*, and Stuart Russell,\
+    *Proceedings of the Twenty-Fifth International Joint Conference on Artificial Intelligence (**IJCAI**), Melbourne, Australia, August 19 - 25, 2017.*
+    \[[pdf](https://aijunbai.github.io/publications/IJCAI17-Bai.pdf)\]
+    \[[bib](https://aijunbai.github.io/publications/IJCAI17-Bai.bib)\]
 
 # maxq-op
 This is the code release of MAXQ-OP algorithm for the Taxi domain as shown in papers:
