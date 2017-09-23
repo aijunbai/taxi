@@ -2,8 +2,8 @@
 [![Build Status](https://travis-ci.org/aijunbai/taxi.svg?branch=master)](https://travis-ci.org/aijunbai/taxi)
 
 This release consists of codes for two projects:
-- The MAXQ-based hierarchical *online planning* algorithm: MAXQ-OP
-- The HAMQ-based hierarchical *reinforcement learning* algorithm: HAMQ-INT
+- The MAXQ-based hierarchical **online planning** algorithm: MAXQ-OP
+- The HAMQ-based hierarchical **reinforcement learning** algorithm: HAMQ-INT
 
 Taxi domain:
 
@@ -17,10 +17,7 @@ Averaged over 200 runs.
 
 # hamq-int
 The idea is to identify and take advantage of internal transitions within a HAM, which is represented as a partial program, for efficient hierarchical reinforcement learning. Details can be found in:
--   **Efficient Reinforcement Learning with Hierarchies of Machines by Leveraging Internal Transitions**, *Aijun Bai*, and Stuart Russell,\
-    *Proceedings of the Twenty-Fifth International Joint Conference on Artificial Intelligence (**IJCAI**), Melbourne, Australia, August 19 - 25, 2017.*
-    \[[pdf](https://aijunbai.github.io/publications/IJCAI17-Bai.pdf)\]
-    \[[bib](https://aijunbai.github.io/publications/IJCAI17-Bai.bib)\]
+-   **Efficient Reinforcement Learning with Hierarchies of Machines by Leveraging Internal Transitions**, *Aijun Bai*, and Stuart Russell, *Proceedings of the Twenty-Fifth International Joint Conference on Artificial Intelligence (**IJCAI**), Melbourne, Australia, August 19 - 25, 2017.* \[[pdf](https://aijunbai.github.io/publications/IJCAI17-Bai.pdf)\]\[[bib](https://aijunbai.github.io/publications/IJCAI17-Bai.bib)\]
 
 # maxq-op
 This is the code release of MAXQ-OP algorithm on the Taxi domain as described in papers:
