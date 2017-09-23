@@ -6,10 +6,13 @@ This release consists of codes for two projects:
 - The HAMQ-based hierarchical *reinforcement learning* algorithm: HAMQ-INT
 
 Taxi domain:
+
 ![taxi.png](taxi.png "Taxi")
 
 Overall results:
+
 ![data/reward.png](data/reward.png "Results")
+
 Averaged over 200 runs.
 
 # hamq-int
