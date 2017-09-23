@@ -14,9 +14,9 @@ node [style=filled];
 	1 -> 6 [color="blue"][label="0"];
 	1 -> 4 [color="blue"][label="1"];
 	1 -> 2 [color="blue"][label="2"];
-	2 -> 3 [color="green"][label="649.000000"];
-	4 -> 5 [color="green"][label="5497.000000"];
-	6 -> 7 [color="green"][label="17619.000000"];
-	8 -> 9 [color="green"][label="18597.000000"];
+	2 -> 3 [color="green"][label="778.000000"];
+	4 -> 5 [color="green"][label="5443.000000"];
+	6 -> 7 [color="green"][label="23763.000000"];
+	8 -> 9 [color="green"][label="19205.000000"];
 }
 

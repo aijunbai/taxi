@@ -2,21 +2,21 @@ Digraph "" {
 ratio=fill
 node [style=filled];
 	1 [label="[$Root, $Get, $Nav ([(target, 3)]), @Dir]"][color="red"];
-	2 [label="[$Root, $Get, $Nav ([(target, 3)]), @Dir];  3"][color="gray"];
-	3 [label="[$Root, $Get, $Nav ([(target, 3)]), @Dir, [$West], @Step]"][color="orange"];
-	4 [label="[$Root, $Get, $Nav ([(target, 3)]), @Dir];  0"][color="gray"];
-	5 [label="[$Root, $Get, $Nav ([(target, 3)]), @Dir, [$North], @Step]"][color="orange"];
-	6 [label="[$Root, $Get, $Nav ([(target, 3)]), @Dir];  1"][color="gray"];
-	7 [label="[$Root, $Get, $Nav ([(target, 3)]), @Dir, [$South], @Step]"][color="orange"];
+	2 [label="[$Root, $Get, $Nav ([(target, 3)]), @Dir];  0"][color="gray"];
+	3 [label="[$Root, $Get, $Nav ([(target, 3)]), @Dir, [$North], @Step]"][color="orange"];
+	4 [label="[$Root, $Get, $Nav ([(target, 3)]), @Dir];  1"][color="gray"];
+	5 [label="[$Root, $Get, $Nav ([(target, 3)]), @Dir, [$South], @Step]"][color="orange"];
+	6 [label="[$Root, $Get, $Nav ([(target, 3)]), @Dir];  3"][color="gray"];
+	7 [label="[$Root, $Get, $Nav ([(target, 3)]), @Dir, [$West], @Step]"][color="orange"];
 	8 [label="[$Root, $Get, $Nav ([(target, 3)]), @Dir];  2"][color="gray"];
 	9 [label="[$Root, $Get, $Nav ([(target, 3)]), @Dir, [$East], @Step]"][color="orange"];
 	1 -> 8 [color="blue"][label="2"];
-	1 -> 6 [color="blue"][label="1"];
-	1 -> 4 [color="blue"][label="0"];
-	1 -> 2 [color="blue"][label="3"];
-	2 -> 3 [color="green"][label="743.000000"];
-	4 -> 5 [color="green"][label="21830.000000"];
-	6 -> 7 [color="green"][label="4826.000000"];
-	8 -> 9 [color="green"][label="16154.000000"];
+	1 -> 6 [color="blue"][label="3"];
+	1 -> 4 [color="blue"][label="1"];
+	1 -> 2 [color="blue"][label="0"];
+	2 -> 3 [color="green"][label="18608.000000"];
+	4 -> 5 [color="green"][label="4230.000000"];
+	6 -> 7 [color="green"][label="776.000000"];
+	8 -> 9 [color="green"][label="17123.000000"];
 }
 
