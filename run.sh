@@ -21,10 +21,9 @@ set -o nounset                              # Treat unset variables as an error
 
 VERSION="release"
 SIZE="5"
-TRIALS="400"
+TRIALS="100"
 EPISODES="100000"
 PLT="plot.gnuplot"
-PROFILE=""
 OPT=""
 
 declare -a ALGS=(
@@ -32,6 +31,7 @@ declare -a ALGS=(
         "HAMQ" 
         "MaxQ-Q" 
         "MaxQ-0" 
+        "MaxQ-OP" 
     )
 
 if [ $VERSION = "debug" ]; then
@@ -54,7 +54,7 @@ echo "plot \\" >> plot.gnuplot
 LS="1"
 for alg in "${ALGS[@]}"; do
     time ../taxi $OPT --size $SIZE --trials $TRIALS --episodes $EPISODES \
-        --train $PROFILE --multithreaded --$alg > ${alg}.out
+        --train --multithreaded --$alg > ${alg}.out
     echo "'${alg}.out' u 1:2:3 t \"${alg}\" ls $LS with yerrorlines, \\" >> plot.gnuplot
     LS="`expr $LS + 1`"
 done

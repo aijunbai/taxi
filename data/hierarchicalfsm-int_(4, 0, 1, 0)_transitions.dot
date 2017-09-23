@@ -1,0 +1,22 @@
+Digraph "" {
+ratio=fill
+node [style=filled];
+	1 [label="[$Root, $Put, $Nav ([(target, 0)]), @Dir]"][color="red"];
+	2 [label="[$Root, $Put, $Nav ([(target, 0)]), @Dir];  3"][color="gray"];
+	3 [label="[$Root, $Put, $Nav ([(target, 0)]), @Dir, [$West], @Step]"][color="orange"];
+	4 [label="[$Root, $Put, $Nav ([(target, 0)]), @Dir];  1"][color="gray"];
+	5 [label="[$Root, $Put, $Nav ([(target, 0)]), @Dir, [$South], @Step]"][color="orange"];
+	6 [label="[$Root, $Put, $Nav ([(target, 0)]), @Dir];  0"][color="gray"];
+	7 [label="[$Root, $Put, $Nav ([(target, 0)]), @Dir, [$North], @Step]"][color="orange"];
+	8 [label="[$Root, $Put, $Nav ([(target, 0)]), @Dir];  2"][color="gray"];
+	9 [label="[$Root, $Put, $Nav ([(target, 0)]), @Dir, [$East], @Step]"][color="orange"];
+	1 -> 8 [color="blue"][label="2"];
+	1 -> 6 [color="blue"][label="0"];
+	1 -> 4 [color="blue"][label="1"];
+	1 -> 2 [color="blue"][label="3"];
+	2 -> 3 [color="green"][label="69381.000000"];
+	4 -> 5 [color="green"][label="91974.000000"];
+	6 -> 7 [color="green"][label="22000.000000"];
+	8 -> 9 [color="green"][label="650.000000"];
+}
+

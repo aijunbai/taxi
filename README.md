@@ -21,6 +21,9 @@ This is the code release of MAXQ-OP algorithm for the Taxi domain as shown in pa
 
 It has also some less-tested implementations of other reinforcement learning and offline/online planning algorithms, such as dynamic programming, Q learning, SARSA learning, expected A\*, UCT, etc. 
 
+# Results
+[Comparisons](data/reward.png)
+
 # Files
 - `maxqop.{h, cpp}`: the MAXQ-OP algorithm
 - `HierarchicalFSMAgent.{h, cpp}`: the HAMQ-INT algorithm

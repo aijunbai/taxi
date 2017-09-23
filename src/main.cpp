@@ -143,6 +143,7 @@ int main(int argc, char **argv) {
         ("qlearning", "use Qlearning algorithm")
         ("sasarlambda", "use SASAR-lambda algorithm")
         ("maxqop", "use MaxQ-OP algorithm")
+        ("MaxQ-OP", "use MaxQ-OP algorithm")
         ("dynamicprogramming", "use DynamicProgramming algorithm")
         ("astar", "use A* algorithm")
         ("uct", "use UCT algorithm")
@@ -187,7 +188,7 @@ int main(int argc, char **argv) {
     else if (vm.count("sasar-lambda")) {
       algorithm = ALG_SarsaLambda;
     }
-    else if (vm.count("maxq-ol")) {
+    else if (vm.count("maxqop") || vm.count("MaxQ-OP")) {
       algorithm = ALG_MaxQOP;
     }
     else if (vm.count("dynamicprogramming")) {
