@@ -42,3 +42,6 @@ This is the code release of MAXQ-OP algorithm on the Taxi domain as described in
 - libboost-program-options-dev
 - gnuplot
 
+# Related Projects
+- MAXQ-OP on RoboCup Soccer Simulation 2D Challenge: [https://github.com/wrighteagle2d/wrighteaglebase](https://github.com/wrighteagle2d/wrighteaglebase)
+- Concurrent HAMQ on RoboCup Soccer Simulation 2D Keepaway Challenge: [https://github.com/aijunbai/keepaway](https://github.com/aijunbai/keepaway)
