@@ -2,8 +2,8 @@
 [![Build Status](https://travis-ci.org/aijunbai/taxi.svg?branch=master)](https://travis-ci.org/aijunbai/taxi)
 
 This release consists of codes for two projects:
-- The MAXQ-based hierarchical **online planning** algorithm: MAXQ-OP
-- The HAMQ-based hierarchical **reinforcement learning** algorithm: HAMQ-INT
+- The MAXQ-based hierarchical **online planning** algorithm: [MAXQ-OP](https://aijunbai.github.io/publications/TIST15-Bai.pdf)
+- The HAMQ-based hierarchical **reinforcement learning** algorithm: [HAMQ-INT](https://aijunbai.github.io/publications/IJCAI17-Bai.pdf)
 
 Taxi domain:
 
